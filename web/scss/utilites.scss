@@ -1,0 +1,71 @@
+// Utilities
+body{
+    padding:0;
+    margin:0;
+}
+// Grid system
+// 12 column grid
+.col-1, .col-2, .col-3, 
+.col-4, .col-5, .col-6, 
+.col-7, .col-8, .col-9, 
+.col-10, .col-11, .col-12{
+    align-self: flex-start;
+    box-sizing: border-box;
+}
+.col-1{ width: 8.33%; }
+.col-2{ width: 16.66%; }
+.col-3{ width: 25%; }
+.col-4{ width: 33.33%; }
+.col-5{ width: 41.66%; }
+.col-6{ width: 50%; }
+.col-7{ width: 58.33%; }
+.col-8{ width: 66.66%; }
+.col-9{ width: 75%; }
+.col-10{ width: 83.33%; }
+.col-11{ width: 91.66%; }
+.col-12{ width: 100%; }
+
+.row{
+    display: flex;
+    flex-flow: row;
+    box-sizing: border-box;
+}
+.container{
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+$spacing-values: (
+  0: 0,
+  1: 0.25rem,
+  2: 0.5rem,
+  3: 1rem,
+  4: 1.5rem,
+  5: 3rem
+);
+
+// Generar clases de margen
+@each $key, $value in $spacing-values {
+  .m-#{$key} { margin: $value!important; }
+  .mt-#{$key} { margin-top: $value!important; }
+  .mb-#{$key} { margin-bottom: $value!important; }
+  .ml-#{$key} { margin-left: $value!important; }
+  .mr-#{$key} { margin-right: $value!important; }
+}
+
+// Generar clases de padding
+@each $key, $value in $spacing-values {
+  .p-#{$key} { padding: $value!important; }
+  .pt-#{$key} { padding-top: $value!important; }
+  .pb-#{$key} { padding-bottom: $value!important; }
+  .pl-#{$key} { padding-left: $value!important; }
+  .pr-#{$key} { padding-right: $value!important; }
+}
+
+.d-flex{ display: flex; }
+.d-block{ display: block; }
+.d-inline{ display: inline; }
+.d-inline-block{ display: inline-block; }
+.d-none{ display: none; }

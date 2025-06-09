@@ -1,0 +1,9 @@
+name: horacioxyz
+services:
+  appserver:
+    type: apache:2.4
+    webroot: ./web
+    ssl: true
+proxy:
+  appserver:
+    - horacio.lndo.site

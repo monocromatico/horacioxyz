@@ -1,0 +1,42 @@
+/*body{
+    background:red;
+}*/
+
+.home{
+    margin: 0 !important;
+    padding:0!important;
+    color:black;
+    h1{
+        font-weight:500;
+        margin-top:0;
+        font-size:5vw;
+        margin-bottom:.1rem;
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-weight:800;
+    }
+    h2{
+        font-weight:500;
+        font-size:2.8vw;
+        font-family: monospace;
+    }
+    a{
+       // color:white;
+        margin-right:2rem;
+    }
+
+    ul{
+        list-style:none;
+        padding-left:0;
+        display: flex;
+        flex-flow: row;
+        li{
+            margin-bottom:0.5rem;
+            font-size:1rem;
+            a{
+                //color:white;
+                font-size:13pt;
+                font-family:monospace
+            }
+        }
+    }
+}
