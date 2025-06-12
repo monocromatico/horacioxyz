@@ -24,8 +24,9 @@
                 <h1 class="mb-4">Horacio Ramirez</h1>
                 <p class="ff-monospace mt-0 mb-4">
                     Solutions Architect & Tech Lead<br>
-                    <a class="ff-monospace" href="mailto:h.sandbox772@simplelogin.com">h.think071@slmail.me</a><br>
+                    <span class="monospace" id="e"></span><br>
                 </p>
+
                 <div class="resume-summary mt-5">
                     <h2 class="ff-libre">Summary</h2>
                     <p>
@@ -140,4 +141,14 @@
             </div></div>
     </div>
 </body>
+<script type="text/javascript">
+    onload = function(){
+        // #e
+        var a = atob("aC50aGluazA3MUBzbG1haWwubWU=");
+        var anc = document.createElement("a");
+        anc.innerHTML = a;
+        anc.href = "mailto:" + a;
+        document.querySelector('#e').appendChild(anc);
+    };
+</script>
 </html>
