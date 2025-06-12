@@ -6,8 +6,20 @@
     <title>if you must</title>
 </head>
 <body>
+    
     <p>
-    email: <a href="mailto:h.think071@slmail.me">h.think071@slmail.me</a><br>
+        email: <a target="_blank"></a><br>    
+        <span id="e"></span>
     </p>
+    <script type="text/javascript">
+        onload = function(){
+            // #e
+            var a = atob("aC50aGluazA3MUBzbG1haWwubWU=");
+            var anc = document.createElement("a");
+            anc.innerHTML = a;
+            anc.href = "mailto:" + a;
+            document.querySelector('#e').appendChild(anc);
+        };
+    </script>
 </body>
 </html>
