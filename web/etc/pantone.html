@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gradientes Múltiples</title>
+  <style>
+    html,
+    body{
+        background:black;
+        margin:0;
+        padding:0;
+    }
+    .gradient{
+        display: flex;
+        margin:0
+    }
+    .gradient > * {
+      width: 100px;
+      height: 250px;
+      display: inline-block;
+      margin: 0px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Ejemplo 1: Negro a blanco con spans -->
+<div class="gradient" 
+     start-color="0,0,0" 
+     end-color="255,255,255" 
+     steps="10" 
+     inner-element="span">
+</div>
+
+<!-- Ejemplo 2: Rojo a azul con divs -->
+<div class="gradient" 
+     start-color="255,0,0" 
+     end-color="0,0,255" 
+     steps="20" 
+     inner-element="div">
+</div>
+
+<!-- Ejemplo 3: Verde a púrpura con p -->
+<div class="gradient" 
+     start-color="0,255,0" 
+     end-color="128,0,128" 
+     steps="5" 
+     inner-element="p">
+</div>
+
+<script>
+  function parseColor(attr) {
+    return attr.split(',').map(c => parseInt(c.trim()));
+  }
+
+  function generateGradientElements(container) {
+    const startColor = parseColor(container.getAttribute("start-color") || "0,0,0");
+    const endColor = parseColor(container.getAttribute("end-color") || "255,255,255");
+    const steps = parseInt(container.getAttribute("steps")) || 0;
+    const tag = container.getAttribute("inner-element") || "div";
+
+    container.innerHTML = "";
+
+    for (let i = 0; i < steps; i++) {
+      const ratio = steps > 1 ? i / (steps - 1) : 0;
+      const r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * ratio);
+      const g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * ratio);
+      const b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * ratio);
+      const el = document.createElement(tag);
+      el.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+      container.appendChild(el);
+    }
+  }
+
+  // Procesar todos los .gradient
+  document.querySelectorAll(".gradient").forEach(generateGradientElements);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script src="./assets/p5/p5.min.js"></script>
+    <script src="./assets/p5/addons/p5.sound.min.js"></script>
+    <style>
+        body,html{
+            margin:0;
+            padding:0;
+        }
+    </style>
+  </head>
+  <body>
+  <audio id="audioPlayer" src="assets/flash.mp3" controls style="position:fixed;bottom:0px;width:100%;z-index:10;"></audio>
+  
+    <script>
+let fft;
+let particles = [];
+const BACKGROUND_TRANSPARENCY = 20;
+let started = false;
+let audioElement;
+let audioSource;
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  noStroke();
+  fft = new p5.FFT();
+
+  // Obtén el elemento de audio HTML
+  audioElement = document.getElementById('audioPlayer');
+
+  // Conecta el elemento de audio HTML al contexto de p5.sound
+  let ctx = getAudioContext();
+  audioSource = ctx.createMediaElementSource(audioElement);
+  audioSource.connect(ctx.destination); // Para que se escuche
+  fft.setInput(audioSource);
+
+  // Inicia la visualización cuando el usuario le da play al audio
+  audioElement.addEventListener('play', () => {
+    started = true;
+    getAudioContext().resume();
+  });
+  audioElement.addEventListener('pause', () => {
+    started = false;
+  });
+}
+
+      function draw() {
+          if (!started) return; // Solo dibuja si el audio está sonando
+
+         background(255, BACKGROUND_TRANSPARENCY);
+        let spectrum = fft.analyze();
+                for (let i = 0; i < 20; i++) { // Genera 20 partículas por frame
+          let freq = spectrum[i * 50]; // Toma la energía de una banda de frecuencia específica del espectro
+          let angle = random(TWO_PI); // Ángulo aleatorio en radianes para la dirección de la partícula
+          //let speed = random(width / 200, width / 10); // Velocidad aleatoria, depende del tamaño del canvas
+          speed = 20;
+
+          let p = {
+            x: width / 2,         // Posición inicial X: centro del canvas
+            y: height / 2,        // Posición inicial Y: centro del canvas
+            prevX: width / 2,     // Guarda la posición anterior X (para la estela)
+            prevY: height / 2,    // Guarda la posición anterior Y (para la estela)
+            vx: cos(angle) * speed, // Velocidad en X calculada con el ángulo y la magnitud
+            vy: sin(angle) * speed, // Velocidad en Y calculada con el ángulo y la magnitud
+            size: map(constrain(freq, 0, 255), 0, 155, 0, 250), // detalle del tamaño de la partícula basado en la energía de la frecuencia
+            // El tamaño de la partícula se mapea entre 5 y 50 píxeles según la energía de la frecuencia
+            // constrain(freq, 0, 255) asegura que la frecuencia esté entre 0 y 255
+            // para evitar valores fuera de rango
+            life: 100             // Vida útil de la partícula (cuántos frames dura)
+          };
+          particles.push(p);      // Agrega la partícula al arreglo global de partículas
+        }
+
+        for (let i = particles.length - 1; i >= 0; i--) { // Recorre todas las partículas de atrás hacia adelante
+          let p = particles[i];
+          stroke(255, p.life * 2); // Define el color y opacidad de la estela (más vida = más opaco)
+          //line(p.prevX, p.prevY, p.x, p.y); // Dibuja la estela desde la posición anterior a la actual
+          noStroke(); // Desactiva el contorno para el círculo
+          fill(0, p.life * 2); // Color y opacidad del círculo de la partícula
+          circle(p.x, p.y, p.size); // Dibuja la partícula como un círculo
+
+          // Actualiza la posición anterior antes de mover la partícula
+          p.prevX = p.x; // Guarda la posición actual como anterior para el siguiente frame
+          p.prevY = p.y;
+
+          // Mueve la partícula según su velocidad
+          p.x += p.vx; // Suma la velocidad en X a la posición X
+          p.y += p.vy; // Suma la velocidad en Y a la posición Y
+
+          // Reduce la vida de la partícula
+          p.life -= 2; // Cada frame la partícula pierde 2 de vida (se desvanece más rápido)
+
+          // Si la vida llega a 0 o menos, elimina la partícula del arreglo
+          if (p.life <= 0) particles.splice(i, 1);
+        }
+
+        /* --- Visualización del espectro ---
+        noStroke();
+        for (let i = 0; i < spectrum.length; i++) {
+            let x = map(i, 0, spectrum.length, 0, width); // Posición horizontal de la barra
+            let h = -map(spectrum[i], 0, 255, 0, height / 3); // Altura de la barra (negativa para que crezca hacia arriba)
+            fill(100, 200, 255, 180); // Color de la barra
+            rect(x, height, width / spectrum.length, h); // Dibuja la barra
+        }
+        // --- Fin visualización espectro ---
+        */
+        // --- DETECCIÓN DE GOLPE DE BOMBO ---
+        // Promediamos las frecuencias bajas (por ejemplo, los primeros 10 índices)
+          // --- DETECCIÓN DE GOLPE DE BOMBO (beat detection) ---
+            let bassEnergy = 0;
+            for (let i = 0; i < 10; i++) {
+                bassEnergy += spectrum[i];
+            }
+            bassEnergy /= 10;
+
+           
+
+          // Si la energía baja supera un umbral, dibuja un círculo grande
+        if (bassEnergy > 140) { // Puedes ajustar el umbral (180) según tu música
+                noFill(); // El círculo no tendrá relleno
+                stroke(255, 0, 180, 255); // Color y transparencia del contorno rojo 
+                strokeWeight(2); // Grosor del contorno (puedes ajustar este valor)
+                ellipse(width / 2, height / 2, map(bassEnergy, 200, 140, 500, 800)); // Dibuja un círculo en el centro del canvas con un tamaño proporcional a la energía del bombo 
+                // El círculo se dibuja en el centro del canvas
+                // map() se usa para escalar el tamaño del círculo según la energía del bombo
+                // map(bassEnergy, 180, 255, 400, 800) significa que si la energía del bombo es 180, el círculo tendrá un tamaño de 400 píxeles, y si es 255, tendrá un tamaño de 800 píxeles
+                // El tamaño del círculo se mapea entre 400 y 800 píxeles según la energía del bombo
+                // Puedes ajustar los valores 400 y 800 para cambiar el tamaño mínimo y máximo del círculo
+                noStroke(); // Opcional: desactiva el contorno para los siguientes dibujos
+            }
+
+        // --- DETECCIÓN DE CAJA (snare) ---
+            let snareEnergy = 0; // Promediamos las frecuencias medias (por ejemplo, entre 20 y 40)
+            for (let i = 20; i < 40; i++) { // Ajusta el rango según tu espectro
+                snareEnergy += spectrum[i];
+            }
+            snareEnergy /= 20;
+            if (snareEnergy > 120) { // Ajusta el umbral según tu música
+                noFill();
+                stroke(100, 255, 100, 180); // Verde para la caja
+                strokeWeight(2);
+                ellipse(width / 2, height / 2, map(snareEnergy, 120, 255, 50, 1650));
+                noStroke();
+            }
+
+            // --- DETECCIÓN DE PLATILLOS (hi-hats) ---
+            let hatsEnergy = 0;
+            for (let i = 100; i < 120; i++) { // Índices altos para platillos
+                hatsEnergy += spectrum[i];
+            }
+            hatsEnergy /= 20;
+            if (hatsEnergy > 80) {
+                noFill();
+                stroke(255, 255, 100, 180); // Amarillo para platillos
+                strokeWeight(1);
+                ellipse(width / 2, height / 2, map(hatsEnergy, 80, 255, 30, 1500));
+                noStroke();
+            }
+
+            // --- DETECCIÓN DE VOCES ---
+            let voiceEnergy = 0;
+            for (let i = 40; i < 80; i++) { // Ajusta el rango para voces
+                voiceEnergy += spectrum[i];
+            }
+            voiceEnergy /= 40;
+            if (voiceEnergy > 100) {
+                noFill();
+                stroke(100, 100, 255, 255); // Azul para voces
+                strokeWeight(2);
+                rectMode(CENTER);
+                ellipse(width / 2, height / 2, map(voiceEnergy, 40, 255, 60, 1200));
+                noStroke();
+            }
+
+
+      }
+    </script>
+  </body>
+</html>
