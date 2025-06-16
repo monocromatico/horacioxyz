@@ -96,7 +96,8 @@ function setup() {
           if (p.life <= 0) particles.splice(i, 1);
         }
 
-        /* --- Visualización del espectro ---
+        /*
+        // --- Visualización del espectro ---
         noStroke();
         for (let i = 0; i < spectrum.length; i++) {
             let x = map(i, 0, spectrum.length, 0, width); // Posición horizontal de la barra
@@ -106,19 +107,16 @@ function setup() {
         }
         // --- Fin visualización espectro ---
         */
+
         // --- DETECCIÓN DE GOLPE DE BOMBO ---
-        // Promediamos las frecuencias bajas (por ejemplo, los primeros 10 índices)
-          // --- DETECCIÓN DE GOLPE DE BOMBO (beat detection) ---
             let bassEnergy = 0;
             for (let i = 0; i < 10; i++) {
                 bassEnergy += spectrum[i];
             }
             bassEnergy /= 10;
 
-           
-
-          // Si la energía baja supera un umbral, dibuja un círculo grande
-        if (bassEnergy > 140) { // Puedes ajustar el umbral (180) según tu música
+            // Si la energía baja supera un umbral, dibuja un círculo grande
+            if (bassEnergy > 140) { // Puedes ajustar el umbral (180) según tu música
                 noFill(); // El círculo no tendrá relleno
                 stroke(255, 0, 180, 255); // Color y transparencia del contorno rojo 
                 strokeWeight(2); // Grosor del contorno (puedes ajustar este valor)
@@ -169,7 +167,6 @@ function setup() {
                 noFill();
                 stroke(100, 100, 255, 255); // Azul para voces
                 strokeWeight(2);
-                rectMode(CENTER);
                 ellipse(width / 2, height / 2, map(voiceEnergy, 40, 255, 60, 1200));
                 noStroke();
             }
