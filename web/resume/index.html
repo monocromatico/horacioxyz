@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horacio Ramirez - Solutions Architect & Tech Lead</title>
+    <title>Horacio Ramirez - UX Engineer</title>
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,7 +22,7 @@
         <div class="container bg-white">
             <div class="col-12 col-12 pt-2 pl-3 pr-3 pb-3">
                 <h1 class="mb-4">Horacio Ramirez</h1>
-                <p class="ff-monospace mt-0 mb-4">
+                <p class="jobTitleElement mt-0 mb-4">
                     Solutions Architect & Tech Lead<br>
                     <span class="monospace" id="e"></span><br>
                 </p>
@@ -30,7 +30,7 @@
                 <div class="resume-summary mt-5">
                     <h2 class="ff-libre">Summary</h2>
                     <p>
-                        Highly accomplished <strong>Solutions Architect & Tech Lead</strong> with 15+ years of experience in <strong>designing, architecting, and implementing scalable web solutions</strong>. I excel at <strong>bridging technical complexities with elegant user experiences</strong>, leading cross-functional teams, and driving end-to-end project delivery from <strong>strategic architectural design</strong> to flawless deployment and client engagement. My background in graphic and UI/UX design fuels my passion for <strong>creating intuitive, high-performance, and user-centric systems</strong> that truly exceed business objectives.
+                        Highly accomplished <strong class="jobTitleElement">Solutions Architect & Tech Lead</strong> with 15+ years of experience in <strong>designing, architecting, and implementing scalable web solutions</strong>. I excel at <strong>bridging technical complexities with elegant user experiences</strong>, leading cross-functional teams, and driving end-to-end project delivery from <strong>strategic architectural design</strong> to flawless deployment and client engagement. My background in graphic and UI/UX design fuels my passion for <strong>creating intuitive, high-performance, and user-centric systems</strong> that truly exceed business objectives.
                     </p>
                 </div>
 
@@ -150,5 +150,17 @@
         anc.href = "mailto:" + a;
         document.querySelector('#e').appendChild(anc);
     };
+
+    //script to get from query string  job title rewrite
+    var urlParams = new URLSearchParams(window.location.search);
+    var jobTitle = urlParams.get('jobTitle');
+    if (jobTitle) {
+        var jobTitleElement = document.querySelectorAll('.jobTitleElement');
+        if (jobTitleElement) {
+            jobTitleElement.innerHTML = jobTitle;
+        }
+    }else{
+        jobTitleElement.innerHTML = "Solutions Architect & Tech Lead";
+    }
 </script>
 </html>

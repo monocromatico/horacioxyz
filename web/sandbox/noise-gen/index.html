@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Generador de Ruido SVG</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 1rem;
+      font-family: sans-serif;
+      background: #1e1e1e;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .ruido {
+      border: 2px solid white;
+      margin-top: 1rem;
+      background-size: cover;
+      background-repeat: repeat;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.5rem 1rem;
+      align-items: center;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .control-label {
+      white-space: nowrap;
+    }
+
+    input[type="range"], input[type="color"] {
+      width: 100%;
+    }
+
+    #output {
+      font-size: 0.8rem;
+      margin-top: 1rem;
+      background: #2e2e2e;
+      padding: 0.5rem;
+      border-radius: 6px;
+      color:white;
+      word-break: break-word;
+      max-width: 90vw;
+      width:50%;
+      min-height:30rem;
+    }
+
+    .buttons {
+      margin-top: 1rem;
+      display: flex;
+      gap: 1rem;
+    }
+
+    button {
+      background: #444;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🎛️ Generador de Ruido SVG</h2>
+
+  <div class="controls">
+    <label class="control-label">Ancho</label>
+    <input id="width" type="range" min="50" max="800" value="300">
+    <span id="widthVal">300</span>
+
+    <label class="control-label">Alto</label>
+    <input id="height" type="range" min="50" max="800" value="300">
+    <span id="heightVal">300</span>
+
+    <label class="control-label">Tamaño punto</label>
+    <input id="radius" type="range" min="0.1" max="5" step="0.1" value="1.5">
+    <span id="radiusVal">1.5</span>
+
+    <label class="control-label">Opacidad de Puntos</label>
+    <input id="opacity" type="range" min="0.01" max="1" step="0.01" value="0.05">
+    <span id="opacityVal">0.05</span>
+
+    <label class="control-label">Densidad</label>
+    <input id="density" type="range" min="1" max="1000" value="100">
+    <span id="densityVal">70</span>
+
+    <label class="control-label">Color puntos</label>
+    <input id="dotColor" type="color" value="#ffffff">
+    <span id="dotColorVal">#ffffff</span>
+
+    <label class="control-label">Color fondo</label>
+    <input id="bgColor" type="color" value="#000000">
+    <span id="bgColorVal">#000000</span>
+  </div>
+
+  <div class="ruido" id="preview"></div>
+  <div class="buttons">
+    <button onclick="exportSVG()">⬇️ Exportar SVG</button>
+    <button onclick="exportPNG()">⬇️ Exportar PNG</button>
+  </div>
+  <textarea id="output"></textarea>
+
+  <script>
+    function generarSVGNoise({ width, height, radius, opacity, density, dotColor, bgColor }) {
+      let puntos = '';
+      const cantidad = density * 10;
+
+      for (let i = 0; i < cantidad; i++) {
+        const x = Math.random() * width;
+        const y = Math.random() * height;
+        const r = Math.random() * radius;
+        puntos += `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r.toFixed(2)}" fill="${dotColor}" opacity="${opacity}"/>`;
+      }
+
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+          <rect width="100%" height="100%" fill="${bgColor}"/>
+          ${puntos}
+        </svg>
+      `.trim();
+
+      return svg;
+    }
+
+    function updatePreview() {
+      const width = parseInt(document.getElementById('width').value);
+      const height = parseInt(document.getElementById('height').value);
+      const radius = parseFloat(document.getElementById('radius').value);
+      const opacity = parseFloat(document.getElementById('opacity').value);
+      const density = parseInt(document.getElementById('density').value);
+      const dotColor = document.getElementById('dotColor').value;
+      const bgColor = document.getElementById('bgColor').value;
+
+      // Actualizar valores visuales
+      document.getElementById('widthVal').textContent = width;
+      document.getElementById('heightVal').textContent = height;
+      document.getElementById('radiusVal').textContent = radius;
+      document.getElementById('opacityVal').textContent = opacity;
+      document.getElementById('densityVal').textContent = density;
+      document.getElementById('dotColorVal').textContent = dotColor;
+      document.getElementById('bgColorVal').textContent = bgColor;
+
+      const svg = generarSVGNoise({ width, height, radius, opacity, density, dotColor, bgColor });
+      const base64 = btoa(unescape(encodeURIComponent(svg)));
+      const dataUri = `url("data:image/svg+xml;base64,${base64}")`;
+
+      const preview = document.getElementById('preview');
+      preview.style.width = `${width}px`;
+      preview.style.height = `${height}px`;
+      preview.style.backgroundImage = dataUri;
+
+      document.getElementById('output').textContent = `background-image: ${dataUri};`;
+
+      // Guardar para exportaciones
+      window._lastSVG = svg;
+      window._lastWidth = width;
+      window._lastHeight = height;
+    }
+
+    function exportSVG() {
+      const blob = new Blob([window._lastSVG], { type: 'image/svg+xml;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'ruido.svg';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function exportPNG() {
+        const svg = window._lastSVG;
+        const width = window._lastWidth;
+        const height = window._lastHeight;
+
+        const svgBlob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+
+        const img = new Image();
+        img.onload = function () {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+
+            // Exportar a PNG
+            canvas.toBlob(blob => {
+            const pngUrl = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = pngUrl;
+            link.download = 'ruido.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Limpieza
+            URL.revokeObjectURL(url);     // Libera el SVG
+            URL.revokeObjectURL(pngUrl);  // Libera el PNG
+            }, 'image/png');
+        };
+
+        img.onerror = function () {
+            alert('❌ Error al convertir SVG a imagen. Verifica el contenido del SVG.');
+            URL.revokeObjectURL(url);
+        };
+
+        img.src = url;
+    }
+
+
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('input', updatePreview);
+    });
+
+    updatePreview(); // Inicial
+  </script>
+
+</body>
+</html>

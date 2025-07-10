@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+
+        <style>
+                input::-webkit-outer-spin-button,
+                input::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+                }
+                input{ max-width:512px; }
+                input[type=number] {
+                -moz-appearance: textfield;
+                }
+        </style>
+</head>
+<body>
+        <div class="container">
+                <description class="row">
+                        <p class="small my-3" style="max-width:50%">
+                                Permite calcular el monto base, IVA, subtotal, retenciones de IVA e ISR y el total a pagar de un recibo de honorarios, teniendo en cuenta el monto base y/o el total a pagar.
+                        </p>
+                </description>
+                <div class="row">
+                        <div class="col-sm-12 mb-3">
+                                <label class="form-label" for="monto_base">Monto base</label>
+                                <input name="monto_base" type="number" class="form-control" step="0.001" >
+                        </div>
+                        <div class="col-sm-12 mb-3">
+                                <label class="form-label" for="iva">IVA (16%)</label>
+                                <input type="number" name="iva" class="form-control" step="0.001">
+                        </div>
+                        <div class="col-sm-12 mb-3">
+                                <label class="form-label" for="subtotal">Subtotal (Monto base + IVA)</label>
+                                <input type="number" name="subtotal" class="form-control" step="0.001">
+                        </div>
+                        <div class="col-sm-12 mb-3">
+                                <label class="form-label" for="retiva">RET IVA (10.666%)</label>
+                                <input type="number" name="retiva" class="form-control" step="0.001">
+                        </div>
+
+                        <div class="col-sm-12 mb-3">
+                                <label class="form-label" for="retisr">RET ISR (1.25%)</label>
+                                <input type="number" name="retisr" class="form-control" step="0.001">
+                        </div>
+
+                        <div class="col-sm-12 mb-3">
+                                <label class="form-label" for="total">Total</label>
+                                <input type="number" name="total" class="form-control" step="0.001">
+                        </div>
+                </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.slim.min.js" integrity="sha512-sNylduh9fqpYUK5OYXWcBleGzbZInWj8yCJAU57r1dpSK9tP2ghf/SRYCMj+KsslFkCOt3TvJrX2AV/Gc3wOqA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+        <script>
+                $(function() {
+                        $('input').val(0);
+
+                        function calc_iva(field_monto_base){
+                                $("input[name='iva']").val(field_monto_base*0.16)
+                        }
+                        function calc_subtotal(field_monto_base, field_iva){
+                                $("input[name='subtotal']").val(+field_monto_base * 1.16)
+                        }
+                        function calc_retiva(field_monto_base){
+                                $("input[name='retiva']").val(+field_monto_base * 0.106666)
+                        }
+                        function calc_retisr(field_monto_base){
+                                $("input[name='retisr']").val(+field_monto_base * 0.0125)
+                        }
+
+                        $('input').on('keyup',function(){
+                                monto_base = $("input[name='monto_base']").val();
+                                iva = $("input[name='iva']").val();
+                                subtotal = $("input[name='subtotal']").val();
+                                retiva = $("input[name='retiva']").val();
+                                retisr = $("input[name='retisr']").val();
+                                total = $("input[name='total']").val();
+
+
+
+                                switch($(this).attr('name')){
+                                        case 'monto_base':
+                                                calc_iva(monto_base)
+                                                calc_subtotal(monto_base, iva)
+                                                calc_retisr(monto_base)
+                                                calc_retiva(monto_base)
+                                                $("input[name='total']").val(+monto_base + +iva - +retiva - +retisr);
+                                        break;
+
+                                        case 'total':
+                                                ret = 1 + 0.16 - 0.106666 - 0.0125;
+                                                $("input[name='monto_base']").val($(this).val() / ret );
+
+                                                calc_iva(monto_base)
+                                                calc_subtotal(monto_base, iva)
+                                                calc_retisr(monto_base)
+                                                calc_retiva(monto_base)
+                                        break;
+                                }
+
+                        })
+                });
+        </script>
+</body>
+</html>
