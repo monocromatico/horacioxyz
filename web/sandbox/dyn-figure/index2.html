@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Triángulo SVG con líneas aleatorias</title>
+  <style>
+    body { margin: 0; background: #111; }
+    svg  { display: block; width: 100vw; height: 100vh; }
+    polygon { fill: none; stroke: white; stroke-width: 5; }
+    line    { stroke: red; stroke-width:3; }
+  </style>
+</head>
+<body>
+
+<svg id="triSvg" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg"></svg>
+
+<script>
+const svg    = document.getElementById("triSvg");
+const side   = 300;
+const height = Math.sqrt(3) / 2 * side;
+const offsetX = 150;
+const offsetY = 100;
+const nLines = 5;
+
+// Coordenadas de los vértices
+const v0 = { x: offsetX,           y: offsetY };
+const v1 = { x: offsetX + side,    y: offsetY };
+const v2 = { x: offsetX + side/2,  y: offsetY + height };
+
+// Dibujar el triángulo
+const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+polygon.setAttribute("points", `${v0.x},${v0.y} ${v1.x},${v1.y} ${v2.x},${v2.y}`);
+svg.appendChild(polygon);
+
+// Función para generar un punto aleatorio sobre un borde
+function pointOnEdge(a, b, t) {
+  return {
+    x: a.x + (b.x - a.x) * t,
+    y: a.y + (b.y - a.y) * t
+  };
+}
+
+// Lista de bordes
+const edges = [
+  [v0, v1],
+  [v1, v2],
+  [v2, v0]
+];
+
+// Dibujar líneas aleatorias que toquen los bordes
+for (let i = 0; i < nLines; i++) {
+  const edge1 = edges[Math.floor(Math.random() * 3)];
+  const edge2 = edges[Math.floor(Math.random() * 3)];
+
+  const p1 = pointOnEdge(edge1[0], edge1[1], Math.random());
+  const p2 = pointOnEdge(edge2[0], edge2[1], Math.random());
+
+  const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  line.setAttribute("x1", p1.x);
+  line.setAttribute("y1", p1.y);
+  line.setAttribute("x2", p2.x);
+  line.setAttribute("y2", p2.y);
+  svg.appendChild(line);
+}
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Triángulo SVG – líneas entre bordes opuestos</title>
+  <style>
+    body { margin:0; background:#111; }
+    svg  { display:block; width:100vw; height:100vh; }
+    polygon { fill:none; stroke:#fff; stroke-width:10; }
+    line    { stroke:#fff; stroke-width:5; }
+    line:nth-child(even) { stroke:#f00; }
+    line:nth-child(odd) { stroke:#0f0; }
+  </style>
+</head>
+<body>
+
+<svg id="triSvg" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg"></svg>
+
+<script>
+const svg      = document.getElementById("triSvg");
+const side     = 300;
+const h        = Math.sqrt(3)/2 * side;
+const offsetX  = 150;
+const offsetY  = 100;
+const nLines   = 7;
+
+// Vértices
+const v0 = {x: offsetX,          y: offsetY};
+const v1 = {x: offsetX + side,   y: offsetY};
+const v2 = {x: offsetX + side/2, y: offsetY + h};
+
+// Dibujar triángulo
+const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+poly.setAttribute("points", `${v0.x},${v0.y} ${v1.x},${v1.y} ${v2.x},${v2.y}`);
+svg.appendChild(poly);
+
+// Punto aleatorio sobre un borde
+function pointOnEdge(a, b, t) {
+  return { x: a.x + (b.x - a.x)*t, y: a.y + (b.y - a.y)*t };
+}
+
+// Bordes (arrays de pares de vértices)
+const edges = [
+  [v0, v1], // borde superior
+  [v1, v2], // borde derecho
+  [v2, v0]  // borde izquierdo
+];
+
+// Dibujar líneas
+for (let i = 0; i < nLines; i++) {
+  // Elegir dos bordes distintos
+  const idx1 = Math.floor(Math.random()*3);
+  let idx2;
+  do { idx2 = Math.floor(Math.random()*3); } while (idx2 === idx1);
+
+  const e1 = edges[idx1];
+  const e2 = edges[idx2];
+
+  const p1 = pointOnEdge(e1[0], e1[1], Math.random());
+  const p2 = pointOnEdge(e2[0], e2[1], Math.random());
+
+  const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  line.setAttribute("x1", p1.x);
+  line.setAttribute("y1", p1.y);
+  line.setAttribute("x2", p2.x);
+  line.setAttribute("y2", p2.y);
+  svg.appendChild(line);
+}
+
+// al hacer clic en el SVG, se actualizan las líneas
+svg.addEventListener("click", () => {
+  window.location.reload();
+});
+</script>
+
+</body>
+</html>
+

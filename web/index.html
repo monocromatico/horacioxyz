@@ -4,19 +4,145 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>horacio ramirez</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Center the content */
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: "Avenir", sans-serif;
+        }
+        body{
+            background: black;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .justify-content-center{
+            justify-content: center;
+        }
+        .justify-content-between{justify-content: space-between;}
+
+        h1{
+            font-size:4vw;
+            color:white;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-align: center;
+            font-family: "Graphit", sans-serif;
+        }
+        .square {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            background: url(./assets/images/bg1.jpg) no-repeat center center #3d0000;
+            background-size: cover;
+            padding: 3rem;
+            width:50vw;
+            height:50vw;
+            max-width:90%;
+            max-height:75%;
+            color: white;
+            margin-bottom:3rem;
+        }
+
+        .row{
+            display: flex;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        .text-white{
+            color:white;
+        }
+
+        .footer {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 50px;
+      font-size: 1.2rem;
+      color: #333;
+    }
+
+    .heart {
+      display: inline-block;
+      cursor:default;
+      animation: beat 1.5s infinite;
+      transition: transform 0.2s ease-in-out;
+    }
+
+    @keyframes beat {
+      0%, 100% { transform: scale(1); }
+      25% { transform: scale(1.1); }
+      50% { transform: scale(1); }
+      75% { transform: scale(1.1); }
+    }
+
+    .heart:hover,
+    .heart:active {
+      animation: none;
+    }
+
+    @font-face {
+        font-family: "Avenir";
+        src: url("./assets/fonts/AvenirLTStd-Medium.otf") format("opentype");
+    }
+    @font-face {
+        font-family: "Graphit";
+        src: url("./assets/fonts/Graphit-Medium.otf") format("opentype");
+    }
+    .text-uppercase{
+        text-transform: uppercase;
+    }
+    </style>
 </head>
-<body class="home">
-    <div class="p-3">
-    <h1>horacio ramirez</h1>
-    <h2>design — web development</h2>
-    <ul class="navigation">
-        <li><a href="#">/resume</a></li>
-        <li><a href="#">/contact</a></li>
-        <li><a href="/sandbox">/sandbox</a></li>
-        <li><a href="#">/etc</a></li>
-    </ul>
-</div>
-    <script src="js/script.js"></script>
+<body>
+    <div class="square">
+        <div class="row justify-content-center">
+            <h1>horacio ramirez</h1>
+        </div>
+        
+        <div class="row justify-content-between">
+            <span class="text-uppercase" style="font-size:1.5rem">design</span><span style="font-size:1.5rem;" class="text-uppercase">code</span>
+        </div>
+        
+    </div>
+<footer id="footer" class="text-white">
+    >
+</footer>
 </body>
+
+  <script>
+    const footer = document.getElementById("footer");
+    const userLang = navigator.language || navigator.userLanguage;
+
+    // Definimos frases según idioma
+    const phrases = {
+      es: 'Hecho con <span class="heart" id="heart">❤️</span> para que el Sol resurja',
+      en: 'Made with <span class="heart" id="heart">❤️</span> so the Sun may rise'
+    };
+
+    // Seleccionamos idioma (es por defecto si no es inglés)
+    const text = userLang.startsWith("en") ? phrases.en : phrases.es;
+    footer.innerHTML = text;
+
+    // Efecto de corazón (igual que antes)
+    const heart = document.getElementById("heart");
+    let toggled = false;
+
+    heart.addEventListener("click", () => {
+      toggled = !toggled;
+      heart.textContent = toggled ? "🫀" : "❤️";
+    });
+
+    footer.addEventListener("mouseover", () => {
+      heart.textContent = "🫀";
+    });
+
+    footer.addEventListener("mouseout", () => {
+      if (!toggled) heart.textContent = "❤️";
+    });
+  </script>
 </html>

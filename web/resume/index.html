@@ -8,29 +8,31 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+    <link rel='stylesheet' href='//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.css'>
 </head>
 <body class="resume">
     <div class="row d-none-print">
-        <nav>
+        <!-- @todo pdf print integration for on the fly resume generation-->
+        <!--<nav class="container p-0">
             <ul class="d-flex flex-row">
-                <li><a style="color:white" href="/">Go back</a></li>
                 <li><a style="color:white" href="/resume/pdf/horacio_ramirez-resume-2025.pdf">Download as PDF</a></li>
             </ul>
-        </nav>
+        </nav>-->
     </div>
     <div class="row">
-        <div class="container bg-white">
+        <div class="page container bg-white">
             <div class="col-12 col-12 pt-2 pl-3 pr-3 pb-3">
-                <h1 class="mb-4">Horacio Ramirez</h1>
-                <p class="jobTitleElement mt-0 mb-4">
-                    Solutions Architect & Tech Lead<br>
-                    <span class="monospace" id="e"></span><br>
+                <h1 class="mb-1">Horacio Ramirez</h1>
+                <p class="job_title_element mt-0 mb-2" style="font-size:16pt">
+                    Designer & UX Engineer</p>
+                <p style="font-size:11pt">
+                    <span id="e" class="monospace"></span>
                 </p>
 
-                <div class="resume-summary mt-5">
+                <div class="resume-summary mt-4">
                     <h2 class="ff-libre">Summary</h2>
                     <p>
-                        Highly accomplished <strong class="jobTitleElement">Solutions Architect & Tech Lead</strong> with 15+ years of experience in <strong>designing, architecting, and implementing scalable web solutions</strong>. I excel at <strong>bridging technical complexities with elegant user experiences</strong>, leading cross-functional teams, and driving end-to-end project delivery from <strong>strategic architectural design</strong> to flawless deployment and client engagement. My background in graphic and UI/UX design fuels my passion for <strong>creating intuitive, high-performance, and user-centric systems</strong> that truly exceed business objectives.
+                        Highly accomplished <strong class="job_title_element">Solutions Architect & Tech Lead</strong> with 15+ years of experience in <strong>designing, architecting, and implementing scalable web solutions</strong>. I excel at <strong>bridging technical complexities with elegant user experiences</strong>, leading cross-functional teams, and driving end-to-end project delivery from <strong>strategic architectural design</strong> to flawless deployment and client engagement. My background in graphic and UI/UX design fuels my passion for <strong>creating intuitive, high-performance, and user-centric systems</strong> that truly exceed business objectives.
                     </p>
                 </div>
 
@@ -40,7 +42,7 @@
                     <div class="job-entry mb-5">
                         <strong class="d-block mb-1 fs-14">Freelance Solutions Architect & Web Developer</strong>
                         <p class="fw-normal mb-1">monocromatico, Mexico City, MX</p>
-                        <p class="fw-normal color-gray">October 2009 – Present</p>
+                        <p class="fw-normal color-gray">October 2008 – Present</p>
                         <p>
                             Delivered <strong>end-to-end web solutions</strong> for diverse clients, seamlessly integrating <strong>innovative UI/UX design principles</strong> with robust architecture, full-stack development, and CI/CD deployment to create compelling digital experiences. Key contributions include:
                         </p>
@@ -118,7 +120,7 @@
                 <div class="resume-education">
                     <h2 class="ff-libre mt-5">Education</h2>
                     <h4 class="fw-normal mb-1">Bachelor’s Degree in Graphic Design (2009)</h4>
-                    <h4 class="fw-normal mb-1">Universidad de Guanajuato, Guanajuato, MX</h4>
+                    <h4 class="fw-normal mb-1">Universidad de Guanajuato, Mexico</h4>
                 </div>
 
                 <div class="resume-skills">
@@ -152,15 +154,22 @@
     };
 
     //script to get from query string  job title rewrite
-    var urlParams = new URLSearchParams(window.location.search);
-    var jobTitle = urlParams.get('jobTitle');
-    if (jobTitle) {
-        var jobTitleElement = document.querySelectorAll('.jobTitleElement');
-        if (jobTitleElement) {
-            jobTitleElement.innerHTML = jobTitle;
-        }
+    var url_params = new URLSearchParams(window.location.search);
+    var job_title = urlParams.get('jobtitle');
+    //console.log("Job Title from URL: ", job_title);
+    var job_title_element = document.querySelectorAll('.job_title_element');
+
+    if (job_title) {    
+        // Update all elements with class job_title_element
+        job_title_element.forEach(function(element) {
+            element.innerHTML = job_title;
+            document.title = "Horacio Ramirez - " + job_title;
+        });
     }else{
-        jobTitleElement.innerHTML = "Solutions Architect & Tech Lead";
+        job_title_element.forEach(function(element) {
+            element.innerHTML = "Designer & UX Engineer";
+            document.title = "Horacio Ramirez - Designer & UX Engineer";
+        });
     }
 </script>
 </html>

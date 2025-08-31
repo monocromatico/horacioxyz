@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Triángulo SVG — regiones coloreadas</title>
+<style>
+  body { margin:0; background:#111; }
+  svg  { width:100vw; height:100vh; display:block; }
+  polygon.edge    { fill:none;  stroke:#fff; stroke-width:2; }
+  line.divider    { stroke:#fff; stroke-width:1; }
+  polygon.region  { stroke:#000; stroke-width:1; }
+</style>
+</head>
+<body>
+
+<svg id="stage" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg"></svg>
+
+<script>
+/* ---------- Parámetros ------------------- */
+const side     = 300;                         // longitud del lado
+const h        = Math.sqrt(3)/2 * side;       // altura
+const offsetX  = 150;                         // margen izquierdo
+const offsetY  = 100;                         // margen superior
+const nLines   = 7;                           // nº de líneas divisorias
+
+/* ---------- Vértices del triángulo -------- */
+const A = {x:offsetX,          y:offsetY};
+const B = {x:offsetX+side,     y:offsetY};
+const C = {x:offsetX+side/2,   y:offsetY+h};
+
+/* ---------- Utilidades geométricas -------- */
+function cross(u,v,w){  // signo del área (u→v)×(u→w)
+  return (v.x-u.x)*(w.y-u.y) - (v.y-u.y)*(w.x-u.x);
+}
+function segIntersect(p1,p2,q1,q2){ // segmento‑segmento
+  const d = (p2.x-p1.x)*(q2.y-q1.y)-(p2.y-p1.y)*(q2.x-q1.x);
+  if(Math.abs(d)<1e-9) return null;           // paralelos
+  const t = ((q1.x-p1.x)*(q2.y-q1.y)-(q1.y-p1.y)*(q2.x-q1.x))/d;
+  const u = ((q1.x-p1.x)*(p2.y-p1.y)-(q1.y-p1.y)*(p2.x-p1.x))/d;
+  if(t<=0||t>=1||u<=0||u>=1) return null;     // fuera de rango
+  return { x:p1.x+t*(p2.x-p1.x), y:p1.y+t*(p2.y-p1.y) };
+}
+
+/* Parte un polígono por la recta L=P1‑P2. Devuelve array de 1‑o‑2 polígonos */
+function splitPolygon(poly, P1, P2){
+  const left=[], right=[];
+  const n=poly.length;
+  for(let i=0;i<n;i++){
+    const curr=poly[i], next=poly[(i+1)%n];
+    const sideCurr = cross(P1,P2,curr);
+    const sideNext = cross(P1,P2,next);
+
+    if(sideCurr>=0) left.push(curr);   else right.push(curr);
+
+    const inter = segIntersect(P1,P2,curr,next);
+    if(inter){
+      left.push(inter);
+      right.push(inter);
+    }
+  }
+  // quitar duplicados consecutivos
+  function clean(arr){
+    return arr.filter((p,i,a)=> i===0 || (Math.abs(p.x-a[i-1].x)>1e-6||Math.abs(p.y-a[i-1].y)>1e-6));
+  }
+  return [clean(left), clean(right)].filter(p=>p.length>=3);
+}
+
+/* ---------- Generar líneas aleatorias -------- */
+const edges = [
+  [A,B],
+  [B,C],
+  [C,A]
+];
+function pointOn(e){ return {x:e[0].x+(e[1].x-e[0].x)*Math.random(),
+                             y:e[0].y+(e[1].y-e[0].y)*Math.random()}; }
+
+/* ---------- Construir subdivisión ------------ */
+let polygons=[[A,B,C]];              // empieza solo con el triángulo
+const dividers=[];                   // guardamos las líneas para dibujarlas
+
+for(let i=0;i<nLines;i++){
+  let e1=edges[Math.floor(Math.random()*3)];
+  let e2;
+  do{ e2=edges[Math.floor(Math.random()*3)]; }while(e2===e1);
+
+  const P1=pointOn(e1), P2=pointOn(e2);
+  dividers.push([P1,P2]);
+
+  // Partir cualquier polígono que cruce esa línea
+  const nextPolys=[];
+  polygons.forEach(poly=>{
+    const parts=splitPolygon(poly,P1,P2);
+    parts.length? nextPolys.push(...parts): nextPolys.push(poly);
+  });
+  polygons=nextPolys;
+}
+
+/* ---------- Dibujar en SVG ------------------- */
+const svg=document.getElementById("stage");
+function make(tag,attrs){
+  const el=document.createElementNS("http://www.w3.org/2000/svg",tag);
+  for(const k in attrs) el.setAttribute(k,attrs[k]);
+  svg.appendChild(el);
+}
+
+/* contorno */
+make("polygon",{class:"edge", points:`${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}`});
+
+/* regiones con color aleatorio */
+polygons.forEach((poly,i)=>{
+  const pts=poly.map(p=>`${p.x},${p.y}`).join(" ");
+  const hue = (i*137.508)%360;               // dorado multiplicativo para distribuir colores
+  make("polygon",{
+    class:"region",
+    points:pts,
+    fill:`hsl(${hue} 70% 45%)`
+  });
+});
+
+/* líneas divisorias encima */
+dividers.forEach(l=>{
+  make("line",{class:"divider",
+    x1:l[0].x, y1:l[0].y, x2:l[1].x, y2:l[1].y});
+});
+</script>
+</body>
+</html>
+

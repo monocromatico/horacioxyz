@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentación - Optimizador de Imágenes (imgopt.php)</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 960px; margin: auto; padding: 2rem; }
+    h1, h2 { color: #333; }
+    code, pre { background: #f4f4f4; padding: 0.3rem 0.5rem; display: inline-block; }
+    img { max-width: 100%; height: auto; margin: 1rem 0; border: 1px solid #ccc; }
+    section { margin-bottom: 2rem; }
+  </style>
+</head>
+<body>
+  <h1>📷 imgopt.php – Optimizador de Imágenes</h1>
+  <p>Este script permite redimensionar y optimizar imágenes locales o remotas mediante parámetros en la URL. Es ideal para generar versiones adaptadas de imágenes en tiempo real y servirlas cacheadas desde el directorio <code>assets/</code>.</p>
+
+  <h2>🔧 Parámetros disponibles</h2>
+  <ul>
+    <li><code>src</code> – Ruta de la imagen (relativa o URL remota)</li>
+    <li><code>max-width</code> – Ancho máximo en píxeles</li>
+    <li><code>max-height</code> – Alto máximo en píxeles</li>
+    <li><code>ratio</code> – Proporción deseada (ej: <code>1:1</code>, <code>16:9</code>)</li>
+    <li><code>crop</code> – Si se debe recortar para mantener la proporción (1 = sí, 0 = no)</li>
+    <li><code>quality</code> – Calidad de compresión (1–100)</li>
+    <li><code>format</code> – Formato de salida: <code>jpg</code>, <code>png</code>, <code>webp</code></li>
+  </ul>
+
+  <h2>📁 Carpeta de caché</h2>
+  <p>Las imágenes optimizadas se almacenan automáticamente en el directorio <code>assets/</code> para evitar reprocesamiento innecesario.</p>
+
+  <h2>🧩 Estructura por lotes</h2>
+  <p>Opcionalmente, puedes organizar imágenes en carpetas individuales por nombre o fecha/hora, como:</p>
+  <pre>/imageopt/
+└── nombre-o-fecha/
+    ├── uploads/           ← Imágenes originales
+    ├── assets/            ← Optimización general (sin presets)
+    └── assets/400x300/    ← Presets con dimensiones específicas</pre>
+  <p>Esto permite gestionar proyectos o lotes de forma independiente.</p>
+
+  <h2>🖼️ Ejemplos de uso</h2>
+
+  <section>
+    <h3>Reducir ancho a 400px</h3>
+    <code>?src=sample.jpg&max-width=400</code><br>
+    <img src="imgopt.php?src=sample.jpg&max-width=400" alt="400px de ancho">
+  </section>
+
+  <section>
+    <h3>Reducir alto a 300px</h3>
+    <code>?src=sample.jpg&max-height=300</code><br>
+    <img src="imgopt.php?src=sample.jpg&max-height=300" alt="300px de alto">
+  </section>
+
+  <section>
+    <h3>Proporción 1:1 con recorte</h3>
+    <code>?src=sample.jpg&max-width=300&ratio=1:1&crop=1</code><br>
+    <img src="imgopt.php?src=sample.jpg&max-width=300&ratio=1:1&crop=1" alt="Recorte 1:1">
+  </section>
+
+  <section>
+    <h3>Formato WebP</h3>
+    <code>?src=sample.jpg&format=webp</code><br>
+    <img src="imgopt.php?src=sample.jpg&format=webp" alt="Formato WebP">
+  </section>
+
+  <section>
+    <h3>Imagen remota</h3>
+    <code>?src=https://placehold.co/600x400/orange/white?text=Remota&max-width=400</code><br>
+    <img src="imgopt.php?src=https://placehold.co/600x400/orange/white?text=Remota&max-width=400" alt="Remota">
+  </section>
+
+  <h2>📚 Cómo funciona el script</h2>
+  <ol>
+    <li>Lee los parámetros de la URL.</li>
+    <li>Genera un <strong>hash único</strong> para crear un nombre de archivo de caché.</li>
+    <li>Verifica si el archivo optimizado ya existe en <code>assets/</code> (o subcarpeta específica).</li>
+    <li>Si no existe:
+      <ul>
+        <li>Descarga la imagen (si es remota).</li>
+        <li>Redimensiona según <code>max-width</code> / <code>max-height</code>.</li>
+        <li>Recorta si se especifica <code>ratio</code> y <code>crop=1</code>.</li>
+        <li>Guarda el archivo optimizado en <code>assets/</code> o su subcarpeta correspondiente.</li>
+      </ul>
+    </li>
+    <li>Entrega la imagen optimizada con cabeceras correctas.</li>
+  </ol>
+
+  <p>🧠 Ideal para proyectos web que necesiten versiones livianas de imágenes sin preprocesarlas manualmente.</p>
+
+</body>
+</html>

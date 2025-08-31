@@ -1,10 +1,109 @@
-<img src="https://horacioxyz.lndo.site/sandbox/placeholder/gen.php?width=600&height=300&bg=ff6600&color=fffffff&text=Hola+Mundo&alpha=1" alt="Placeholder">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Generador de Imágenes Placeholder</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f9f9f9;
+      color: #333;
+      padding: 2rem;
+      max-width: 900px;
+      margin: auto;
+    }
+    h1, h2 {
+      color: #0056b3;
+    }
+    code {
+      background: #eee;
+      padding: 0.2em 0.4em;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    pre {
+      background: #222;
+      color: #0f0;
+      padding: 1em;
+      overflow-x: auto;
+    }
+    img {
+      border: 1px solid #ccc;
+      margin: 10px 0;
+      display: block;
+    }
+    .example {
+      margin-bottom: 2em;
+    }
+  </style>
+</head>
+<body>
 
+  <h1>🖼️ Generador de Imágenes Placeholder en PHP</h1>
+  <p>
+    Este script te permite generar imágenes dinámicas con texto, colores y tamaños configurables mediante parámetros en la URL.
+    Úsalo fácilmente en tus etiquetas <code>&lt;img&gt;</code> como una API REST simple.
+  </p>
 
-<img src="gen.php?width=600&height=300&bg=0000ff&color=ffffff&text=Hola+Mundo&format=jpg">
-<img src="gen.php?width=600&height=300&bg=000&color=fff&text=Izquierda!&align=left&style=bold&size=50">
-<img src="gen.php?width=600&height=300&bg=f00&color=000&text=SVG+con+alpha&format=svg&alpha=0.3">
+  <h2>🔧 Parámetros disponibles</h2>
+  <ul>
+    <li><code>width</code> — Ancho en píxeles (ej: <code>600</code>)</li>
+    <li><code>height</code> — Alto en píxeles (ej: <code>300</code>)</li>
+    <li><code>bg</code> — Color de fondo en hex (ej: <code>ff6600</code>, <code>333</code>)</li>
+    <li><code>color</code> — Color del texto en hex (ej: <code>ffffff</code>)</li>
+    <li><code>text</code> — Texto a mostrar (ej: <code>Hola+Mundo</code>)</li>
+    <li><code>alpha</code> — Opacidad del fondo (entre <code>0</code> y <code>1</code>)</li>
+    <li><code>format</code> — Formato de imagen (<code>png</code>, <code>jpg</code>, <code>gif</code>, <code>svg</code>)</li>
+    <li><code>font</code> — Tipografía disponible (ej: <code>arial</code>, <code>verdana</code>, <code>comic</code>)</li>
+    <li><code>size</code> — Tamaño del texto en px</li>
+    <li><code>align</code> — Alineación del texto: <code>left</code>, <code>center</code> (default), <code>right</code></li>
+  </ul>
 
-<img src="gen.php?width=600&height=300&text=Verdana&font=Verdana&bg=0000ff&color=ffffff&size=100">
-<img src="gen.php?width=600&height=300&text=Courier+Align+Right&font=courier&align=right&format=jpg">
-<img src="gen.php?width=600&height=300&text=SVG+con+Georgia&font=georgia&format=svg">
+  <h2>📷 Ejemplos</h2>
+
+  <div class="example">
+    <h3>1. Imagen básica (600x300)</h3>
+    <code>https://horacio.xyz/sandbox/placeholder/gen?width=600&height=300</code>
+    <img src="./gen.php?width=600&height=300" alt="Ejemplo 1">
+  </div>
+
+  <div class="example">
+    <h3>2. Texto personalizado y colores</h3>
+    <code>https://horacio.xyz/sandbox/placeholder/gen.php?width=400&height=200&text=Hola+Mundo&bg=ff6600&color=ffffff</code>
+    <img src="./gen.php?width=400&height=200&text=Hola+Mundo&bg=ff6600&color=ffffff" alt="Ejemplo 2">
+  </div>
+
+  <div class="example">
+    <h3>3. Formato SVG (vectorial)</h3>
+    <code>https://horacio.xyz/sandbox/placeholder/gen?width=400&height=200&format=svg&text=Escalable</code>
+    <img src="./gen.php?width=400&height=200&format=svg&text=Escalable" alt="Ejemplo SVG">
+  </div>
+
+  <div class="example">
+    <h3>4. Alineación derecha + fuente Verdana</h3>
+    <code>https://horacio.xyz/sandbox/placeholder/gen?width=500&height=150&align=right&text=Texto+a+la+derecha&font=verdana</code>
+    <img src="./gen.php?width=500&height=150&align=right&text=Texto+a+la+derecha&font=verdana" alt="Ejemplo Alineado">
+  </div>
+
+  <div class="example">
+    <h3>5. Imagen con transparencia</h3>
+    <code>https://horacio.xyz/sandbox/placeholder/gen?width=400&height=200&bg=000000&color=ffffff&text=Alpha+30%&alpha=0.3</code>
+    <img src="./gen.php?width=400&height=200&bg=000000&color=ffffff&text=Alpha+30%25&alpha=0.3" alt="Ejemplo Alpha">
+  </div>
+
+  <div class="example">
+    <h3>6. Imagen JPG + fuente Comic Sans</h3>
+    <code>https://horacio.xyz/sandbox/placeholder/gen?width=400&height=200&format=jpg&font=comic&text=Formato+JPG</code>
+    <img src="./gen.php?width=400&height=200&format=jpg&font=comic&text=Formato+JPG" alt="Ejemplo JPG">
+  </div>
+
+  <h2>📦 Cómo usarlo</h2>
+  <p>
+    Puedes insertar imágenes directamente en HTML:
+  </p>
+  <code>
+    
+    &lt;img src="https://horacio.xyz/sandbox/placeholder/gen?width=300&amp;height=150&amp;text=Hola"&gt;
+  </code>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>i18n Auto Translate Demo</title>
+</head>
+<body>
+  <h1 data-i18n="welcome">Bienvenido</h1>
+  <p data-i18n="intro">Este es un demo de traducción automática con ChatGPT</p>
+
+  <label for="lang">Selecciona idioma:</label>
+  <select id="lang">
+    <option value="es">Español</option>
+    <option value="en">English</option>
+    <option value="fr">Français (auto)</option>
+    <option value="it">Italiano (auto)</option>
+  </select>
+
+  <script>
+    async function loadTranslations(lang) {
+      const res = await fetch(`/po/${lang}.po`);
+      if (res.ok) {
+        const po = await res.text();
+        applyTranslations(parsePO(po));
+      } else {
+        // Si no existe el archivo, pedir traducción automática
+        const resAuto = await fetch(`/translate?lang=${lang}`);
+        const po = await resAuto.text();
+        applyTranslations(parsePO(po));
+      }
+    }
+
+    function parsePO(content) {
+      const lines = content.split("\n");
+      const dict = {};
+      let msgid = "", msgstr = "";
+      lines.forEach(l => {
+        if (l.startsWith("msgid")) msgid = l.match(/"(.*)"/)[1];
+        if (l.startsWith("msgstr")) {
+          msgstr = l.match(/"(.*)"/)[1];
+          dict[msgid] = msgstr;
+        }
+      });
+      return dict;
+    }
+
+    function applyTranslations(dict) {
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (dict[key]) el.textContent = dict[key];
+      });
+    }
+
+    document.getElementById("lang").addEventListener("change", e => {
+      loadTranslations(e.target.value);
+    });
+
+    // Cargar idioma inicial
+    loadTranslations("es");
+  </script>
+</body>
+</html>
+

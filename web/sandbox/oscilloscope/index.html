@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Osciloscopio</title>
+  <style>
+    canvas {
+      background: black;
+      display: block;
+      margin: 20px auto;
+      border: 1px solid #444;
+    }
+    body {
+      background: #111;
+      color: white;
+      text-align: center;
+      font-family: sans-serif;
+    }
+    label {
+      margin: 0 10px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 8px 16px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 6px;
+      border: none;
+      background: #28a745;
+      color: white;
+    }
+    button.paused {
+      background: #dc3545;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas_osciloscopio" width="600" height="600"></canvas>
+
+  <div style="display:flex; flex-flow:column">
+    <label style="margin-bottom:1rem">
+      Frecuencia X: <br>
+      <input type="range" id="slider_frecuencia_x" min="50" max="1000" value="440">
+      <span id="valor_frecuencia_x">440 Hz</span>
+    </label>
+    <label style="margin-bottom:1rem">
+      Frecuencia Y: <br>
+      <input type="range" id="slider_frecuencia_y" min="50" max="1000" value="330">
+      <span id="valor_frecuencia_y">330 Hz</span>
+    </label>
+    <label style="margin-bottom:1rem">
+      Desfase: <br>
+      <input type="range" id="slider_desfase" min="0" max="360" value="90">
+      <span id="valor_desfase">90°</span>
+    </label>
+  </div>
+
+  <button id="boton_toggle">Iniciar audio</button>
+
+  <script>
+    // referencias al canvas
+    const canvas_osciloscopio = document.getElementById("canvas_osciloscopio");
+    const contexto_canvas = canvas_osciloscopio.getContext("2d");
+    const ancho_canvas = canvas_osciloscopio.width;
+    const alto_canvas = canvas_osciloscopio.height;
+
+    // referencias a sliders
+    const slider_frecuencia_x = document.getElementById("slider_frecuencia_x");
+    const slider_frecuencia_y = document.getElementById("slider_frecuencia_y");
+    const slider_desfase = document.getElementById("slider_desfase");
+
+    // referencias a valores mostrados
+    const valor_frecuencia_x = document.getElementById("valor_frecuencia_x");
+    const valor_frecuencia_y = document.getElementById("valor_frecuencia_y");
+    const valor_desfase = document.getElementById("valor_desfase");
+
+    // referencia al boton
+    const boton_toggle = document.getElementById("boton_toggle");
+
+    // variables para audio
+    let contexto_audio;
+    let oscilador_x;
+    let oscilador_y;
+    let mezclador;
+
+    // variables de control
+    let esta_reproduciendo = false;
+    let audio_inicializado = false;
+    let id_animacion;
+    let tiempo_animacion = 0;
+
+    // actualizar los textos junto a los sliders
+    function actualizar_etiquetas() {
+      valor_frecuencia_x.textContent = slider_frecuencia_x.value + " Hz";
+      valor_frecuencia_y.textContent = slider_frecuencia_y.value + " Hz";
+      valor_desfase.textContent = slider_desfase.value + "°";
+
+      // si los osciladores ya existen, actualizar sus frecuencias
+      if (oscilador_x && oscilador_y) {
+        oscilador_x.frequency.setValueAtTime(parseFloat(slider_frecuencia_x.value), contexto_audio.currentTime);
+        oscilador_y.frequency.setValueAtTime(parseFloat(slider_frecuencia_y.value), contexto_audio.currentTime);
+      }
+    }
+    slider_frecuencia_x.oninput = actualizar_etiquetas;
+    slider_frecuencia_y.oninput = actualizar_etiquetas;
+    slider_desfase.oninput = actualizar_etiquetas;
+    actualizar_etiquetas();
+
+    // funcion para dibujar la figura en el canvas
+    function dibujar_osciloscopio() {
+      if (!esta_reproduciendo) return;
+
+      // limpiar canvas
+      contexto_canvas.fillStyle = "black";
+      contexto_canvas.fillRect(0, 0, ancho_canvas, alto_canvas);
+
+      // centro y radio de la figura
+      const centro_x = ancho_canvas / 2;
+      const centro_y = alto_canvas / 2;
+      const radio = 200;
+
+      // obtener valores de sliders
+      const frecuencia_x = parseFloat(slider_frecuencia_x.value) / 100;
+      const frecuencia_y = parseFloat(slider_frecuencia_y.value) / 100;
+      const desfase = parseFloat(slider_desfase.value) * Math.PI / 180;
+
+      // configurar estilo de linea
+      contexto_canvas.beginPath();
+      const pasos = 2000;
+      const paso = 0.01;
+
+      // dibujar la curva lissajous
+      for (let i = 0; i < pasos; i++) {
+        const angulo = tiempo_animacion + i * paso ;
+        const x = centro_x + radio * Math.sin(frecuencia_x * angulo);
+        const y = centro_y + radio * Math.sin(frecuencia_y * angulo + desfase);
+        if (i === 0) contexto_canvas.moveTo(x, y);
+        else contexto_canvas.lineTo(x, y);
+      }
+
+      contexto_canvas.strokeStyle = "lime";
+      contexto_canvas.lineWidth = 1.5;
+      contexto_canvas.stroke();
+
+      // avanzar el tiempo
+      tiempo_animacion += 0.2;
+
+      // siguiente frame
+      id_animacion = requestAnimationFrame(dibujar_osciloscopio);
+    }
+
+    // boton play/pause
+    boton_toggle.onclick = async () => {
+      if (!audio_inicializado) {
+        // crear contexto de audio (solo una vez)
+        contexto_audio = new (window.AudioContext || window.webkitAudioContext)();
+
+        // crear osciladores
+        oscilador_x = contexto_audio.createOscillator();
+        oscilador_y = contexto_audio.createOscillator();
+        oscilador_x.type = "sine";
+        oscilador_y.type = "sine";
+
+        // asignar frecuencias iniciales
+        oscilador_x.frequency.value = parseFloat(slider_frecuencia_x.value);
+        oscilador_y.frequency.value = parseFloat(slider_frecuencia_y.value);
+
+        // crear mezclador para enviar cada oscilador a un canal (izq/der)
+        mezclador = contexto_audio.createChannelMerger(2);
+        oscilador_x.connect(mezclador, 0, 0); // canal izquierdo
+        oscilador_y.connect(mezclador, 0, 1); // canal derecho
+        mezclador.connect(contexto_audio.destination);
+
+        // iniciar osciladores
+        oscilador_x.start();
+        oscilador_y.start();
+
+        audio_inicializado = true;
+      }
+
+      // si no esta reproduciendo, iniciar
+      if (!esta_reproduciendo) {
+        await contexto_audio.resume();
+        esta_reproduciendo = true;
+        boton_toggle.textContent = "⏸ pausa";
+        boton_toggle.classList.add("paused");
+        dibujar_osciloscopio();
+      } else {
+        // si esta reproduciendo, pausar
+        await contexto_audio.suspend();
+        esta_reproduciendo = false;
+        boton_toggle.textContent = "▶ reanudar";
+        boton_toggle.classList.remove("paused");
+        cancelAnimationFrame(id_animacion);
+        // limpiar canvas al pausar
+        contexto_canvas.fillStyle = "black";
+        contexto_canvas.fillRect(0, 0, ancho_canvas, alto_canvas);
+      }
+    };
+  </script>
+</body>
+</html>

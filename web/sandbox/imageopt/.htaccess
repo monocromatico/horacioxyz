@@ -1,0 +1,28 @@
+RewriteEngine On
+
+# Elimina .php de URLs
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^([^/]+)/?$ $1.php [L]
+
+# Forzar URLs amigables dentro de imageopt si se requiere
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^imageopt/(.+)$ imageopt/$1.php [L]
+
+# .htaccess para imageopt
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Habilitar acceso directo a subcarpetas
+  Options +FollowSymLinks
+
+  # Protege archivos sensibles
+  <FilesMatch "^(settings|form)\\.php$">
+    Order allow,deny
+    Deny from all
+  </FilesMatch>
+</IfModule>
+
+# Evitar listado de archivos
+Options -Indexes

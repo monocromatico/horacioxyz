@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Triángulo con líneas dinámicas</title>
+  <style>
+    body        { margin: 0; background:#111; overflow:hidden; }
+    canvas      { display:block; }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx     = canvas.getContext("2d");
+
+// ---- Ajustar canvas a ventana ----
+function resizeCanvas() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+
+// ---- Dibujar triángulo equilátero invertido ----
+function drawTriangle() {
+  const side = 300;                           // long. del lado
+  const h    = Math.sqrt(3) / 2 * side;       // altura
+  const x0   = (canvas.width - side) / 2;     // vértice sup‑izq
+  const y0   = 100;                           // margen superior
+  const x1   = x0 + side;                     // vértice sup‑der
+  const xMid = x0 + side / 2;                 // x de la punta
+  const y2   = y0 + h;                        // y de la punta
+
+  // vértices
+  const v0 = { x: x0,   y: y0 };
+  const v1 = { x: x1,   y: y0 };
+  const v2 = { x: xMid, y: y2 };
+
+  ctx.beginPath();
+  ctx.moveTo(v0.x, v0.y);
+  ctx.lineTo(v1.x, v1.y);
+  ctx.lineTo(v2.x, v2.y);
+  ctx.closePath();
+  ctx.strokeStyle = "#fff";
+  ctx.lineWidth   = 2;
+  ctx.stroke();
+
+  return [v0, v1, v2];
+}
+
+// ---- Punto aleatorio sobre un borde ----
+function pointOnEdge(a, b, t) {
+  return {
+    x: a.x + (b.x - a.x) * t,
+    y: a.y + (b.y - a.y) * t
+  };
+}
+
+// ---- Dibujar n líneas que tocan bordes ----
+function drawRandomLines(vertices, n = 5) {
+  const edges = [
+    [vertices[0], vertices[1]], // borde superior
+    [vertices[1], vertices[2]], // borde derecho
+    [vertices[2], vertices[0]]  // borde izquierdo
+  ];
+
+  ctx.strokeStyle = "#0ff";
+  ctx.lineWidth   = 2;
+
+  for (let i = 0; i < n; i++) {
+    const e1 = edges[Math.floor(Math.random() * 3)];
+    const e2 = edges[Math.floor(Math.random() * 3)];
+    const p1 = pointOnEdge(e1[0], e1[1], Math.random());
+    const p2 = pointOnEdge(e2[0], e2[1], Math.random());
+
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.stroke();
+  }
+}
+
+// ---- Render inicial ----
+const verts = drawTriangle();
+drawRandomLines(verts, 5); // cambia “5” para más/menos líneas
+</script>
+</body>
+</html>
+
