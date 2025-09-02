@@ -1,0 +1,1 @@
+This is a dynamic gradient generator to take an array of elements and apply a gradient scale 

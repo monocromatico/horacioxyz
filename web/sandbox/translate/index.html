@@ -2,62 +2,97 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>i18n Auto Translate Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Demo</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-  <h1 data-i18n="welcome">Bienvenido</h1>
-  <p data-i18n="intro">Este es un demo de traducción automática con ChatGPT</p>
+  <!-- Header semántico -->
+  <header>
+    <dashboard-header-main-content></dashboard-header-main-content>
+  </header>
 
-  <label for="lang">Selecciona idioma:</label>
-  <select id="lang">
-    <option value="es">Español</option>
-    <option value="en">English</option>
-    <option value="fr">Français (auto)</option>
-    <option value="it">Italiano (auto)</option>
-  </select>
+  <div class="layout">
+    <main id="main-content" tabindex="-1">
+      <p id="description"></p>
+      <form id="search-form">
+        <input type="text" id="campo_busqueda" placeholder="Buscar video en YouTube">
+        <button type="submit" id="boton_buscar">Buscar</button>
+      </form>
+      <div id="resultado"></div>
+      <div id="info_cancion" style="margin-top:20px; font-family: sans-serif;"></div>
 
-  <script>
-    async function loadTranslations(lang) {
-      const res = await fetch(`/po/${lang}.po`);
-      if (res.ok) {
-        const po = await res.text();
-        applyTranslations(parsePO(po));
-      } else {
-        // Si no existe el archivo, pedir traducción automática
-        const resAuto = await fetch(`/translate?lang=${lang}`);
-        const po = await resAuto.text();
-        applyTranslations(parsePO(po));
-      }
-    }
+  <!-- Scripts -->
+ <script type="module" src="./app.js"></script>
+  <script>/*
+    
 
-    function parsePO(content) {
-      const lines = content.split("\n");
-      const dict = {};
-      let msgid = "", msgstr = "";
-      lines.forEach(l => {
-        if (l.startsWith("msgid")) msgid = l.match(/"(.*)"/)[1];
-        if (l.startsWith("msgstr")) {
-          msgstr = l.match(/"(.*)"/)[1];
-          dict[msgid] = msgstr;
-        }
-      });
-      return dict;
-    }
 
-    function applyTranslations(dict) {
-      document.querySelectorAll("[data-i18n]").forEach(el => {
-        const key = el.getAttribute("data-i18n");
-        if (dict[key]) el.textContent = dict[key];
-      });
-    }
-
-    document.getElementById("lang").addEventListener("change", e => {
-      loadTranslations(e.target.value);
+    document.getElementById("search-form").addEventListener("submit", function(event) {
+      event.preventDefault();
+      buscarVideo();
     });
+    
+    async function buscarVideo() {
+      const term = document.getElementById("campo_busqueda").value;
+     const resp = await fetch('youtube.php?q=' + encodeURIComponent(term));
+    const data = await resp.json();
+    console.log("Datos recibidos de YouTube:", data);
 
-    // Cargar idioma inicial
-    loadTranslations("es");
+        .then(respuesta => respuesta.json())
+        .then(datos => {
+          if (datos.items && datos.items.length > 0) {
+            const video_id = datos.items[0].id.videoId;
+            mostrarVideo(video_id);
+            obtenerInfoCancion(term);
+          } else {
+            document.getElementById("resultado").innerHTML = "No se encontró ningún video.";
+          }
+        })
+        .catch(error => console.error("Error en la búsqueda:", error));
+    }
+
+    // Función para incrustar el video en un iframe
+    function mostrarVideo(video_id) {
+      document.getElementById("resultado").innerHTML = `
+        <iframe width="560" height="315" 
+          src="https://www.youtube.com/embed/${video_id}" 
+          frameborder="0" allowfullscreen>
+        </iframe>
+      `;
+    }
+
+     // Llamada a OpenAI para obtener contexto de la canción
+   async function obtenerInfoCancion(term) {
+    console.log("Obteniendo info de la canción:", term);
+    console.log("Idioma detectado:", localStorage.getItem('lang') || "no detectado");
+      try{
+        const response = await fetch("./openai.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            search_term: term,
+            user_lang: localStorage.getItem('lang') || "en"
+          })
+        });
+        //const textoPlano = await response.text(); // primero lo leemos como texto
+        //console.log("Respuesta cruda del backend:", textoPlano);
+
+        const data = await response.json();
+        const texto = data.choices[0].message.content;
+        document.getElementById("info_cancion").innerHTML = `<strong>Datos relevantes:</strong><br>${texto}`;
+      } catch(e){
+        console.error("Error", e);
+        document.getElementById("info_cancion").innerHTML = "Error al obtener información de la canción.";
+      }
+    }*/
   </script>
+      
+    </main>
+  </div>
+
+
+
 </body>
 </html>
-

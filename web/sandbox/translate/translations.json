@@ -1,0 +1,37 @@
+{
+  "es": {
+    "placeholder": "Buscar canción en YouTube",
+    "boton": "Buscar",
+    "no_resultados": "No se encontró ningún video.",
+    "titulo_datos": "Datos relevantes:",
+    "description": "Esta es una prueba de concepto que combina la API de YouTube y la de OpenAI: al buscar por título de canción o artista + canción se muestra el primer video encontrado y un breve resumen generado automáticamente en el idioma detectado o seleccionado."
+  },
+  "en": {
+    "placeholder": "Search song on YouTube",
+    "boton": "Search",
+    "no_resultados": "No video found.",
+    "titulo_datos": "Relevant data:",
+    "description": "This is a proof of concept combining the YouTube API and OpenAI's: when searching by song title or artist + song, it shows the first video found and a brief summary generated automatically in the detected or selected language."
+  },
+  "fr": {
+    "placeholder": "Chercher une chanson sur YouTube",
+    "boton": "Rechercher",
+    "no_resultados": "Aucune vidéo trouvée.",
+    "titulo_datos": "Données pertinentes:",
+    "description": "Ceci est une preuve de concept combinant l'API YouTube et celle d'OpenAI : en recherchant par titre de chanson ou artiste + chanson, elle affiche la première vidéo trouvée et un bref résumé généré automatiquement dans la langue détectée ou sélectionnée."
+  },
+  "hi": {
+    "placeholder": "YouTube पर गाना खोजें",
+    "boton": "खोजें",
+    "no_resultados": "कोई वीडियो नहीं मिला।",
+    "titulo_datos": "प्रासंगिक जानकारी:",
+    "description": "यह YouTube API और OpenAI की एक प्रमाण अवधारणा है: जब गीत शीर्षक या कलाकार + गीत द्वारा खोजा जाता है, तो यह पहली मिली वीडियो और स्वचालित रूप से पता लगाए गए या चयनित भाषा में एक संक्षिप्त सारांश दिखाता है।"
+  },
+  "de": {
+    "placeholder": "Lied auf YouTube suchen",
+    "boton": "Suchen",
+    "no_resultados": "Kein Video gefunden.",
+    "titulo_datos": "Relevante Daten:",
+    "description": "Dies ist ein Proof of Concept, das die YouTube-API und die von OpenAI kombiniert: Wenn nach Liedtitel oder Künstler + Lied gesucht wird, wird das erste gefundene Video und eine automatisch generierte kurze Zusammenfassung in der erkannten oder ausgewählten Sprache angezeigt."
+  }
+}

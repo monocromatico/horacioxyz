@@ -11,10 +11,10 @@
 <body>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script>
 <script>
-  // 🧱 1. Creamos una escena tridimensional
+  // 1. Creamos una escena tridimensional
   const scene = new THREE.Scene();
 
-  // 🎥 2. Configuramos una cámara con perspectiva
+  // 2. Configuramos una cámara con perspectiva
   //    - 75° de campo de visión vertical
   //    - Proporción (ancho/alto) del viewport
   //    - Planos de recorte cercano (0.1) y lejano (100)
@@ -25,12 +25,12 @@
   camera.position.set(0, 2, 9);
   camera.lookAt(0, 0, 0); // Mirando hacia el centro de la escena
 
-  // 🖼️ 3. Creamos el renderer y lo añadimos al DOM
+  // 3. Creamos el renderer y lo añadimos al DOM
   const renderer = new THREE.WebGLRenderer({ antialias: false });
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
-  // 🎨 4. Definimos los parámetros globales (uniforms) para el shader
+  // 4. Definimos los parámetros globales (uniforms) para el shader
   const uniforms = {
     // Tiempo en segundos, usado para animar (lo modificaremos cada frame)
     u_time: { value: 0.0 },
@@ -42,13 +42,13 @@
     u_bgColor: { value: new THREE.Color('#000000') } // Negro
   };
 
-  // 📐 5. Creamos una geometría de plano (grid)
+  // 5. Creamos una geometría de plano (grid)
   // - Ancho: 100 unidades (eje X)
   // - Profundidad: 100 unidades (eje Z)
   // - Segmentos: 100 x 100 (más segmentos = más UVs disponibles para detalle)
   const geometry = new THREE.PlaneGeometry(100, 100, 100, 100);
 
-  // 🧠 6. Creamos un ShaderMaterial personalizado
+  // 6. Creamos un ShaderMaterial personalizado
   const material = new THREE.ShaderMaterial({
     uniforms: uniforms,
     vertexShader: `
@@ -94,7 +94,7 @@
     side: THREE.DoubleSide // El plano puede verse desde ambos lados
   });
 
-  // 🎛️ 7. Creamos el mesh (forma + material) y lo rotamos
+  // 7. Creamos el mesh (forma + material) y lo rotamos
   const grid = new THREE.Mesh(geometry, material);
 
   // Por defecto, el plano está en el plano XY, lo rotamos a horizontal (plano XZ)
@@ -102,7 +102,7 @@
 
   scene.add(grid); // Añadimos el plano a la escena
 
-  // 🔁 8. Animamos en bucle
+  // 8. Animamos en bucle
   function animate(time) {
     requestAnimationFrame(animate);
 

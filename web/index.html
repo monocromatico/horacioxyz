@@ -26,7 +26,7 @@
         .justify-content-between{justify-content: space-between;}
 
         h1{
-            font-size:4vw;
+            font-size:7vw;
             color:white;
             text-transform: uppercase;
             letter-spacing: 5px;
@@ -118,17 +118,14 @@
     const footer = document.getElementById("footer");
     const userLang = navigator.language || navigator.userLanguage;
 
-    // Definimos frases según idioma
     const phrases = {
       es: 'Hecho con <span class="heart" id="heart">❤️</span> para que el Sol resurja',
       en: 'Made with <span class="heart" id="heart">❤️</span> so the Sun may rise'
     };
 
-    // Seleccionamos idioma (es por defecto si no es inglés)
     const text = userLang.startsWith("en") ? phrases.en : phrases.es;
     footer.innerHTML = text;
-
-    // Efecto de corazón (igual que antes)
+    
     const heart = document.getElementById("heart");
     let toggled = false;
 
