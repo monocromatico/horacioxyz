@@ -19,8 +19,8 @@ function loadEnv($path) {
 }
 
 // Ejecutar carga del .env en la raíz del proyecto
-loadEnv("/app/.env");
-
+//loadEnv("/app/.env"); //lando
+loadEnv(__DIR__ . "/.env"); //prod
 // Acceder a las variables
 $api_key_openai = $_ENV["OPENAI_API_KEY"] ?? "APIKEY_OPENAI";
 $api_key_youtube = $_ENV["YOUTUBE_API_KEY"] ?? "APIKEY_YOUTUBE";
