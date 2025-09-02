@@ -72,7 +72,8 @@ let videoTitle;
 async function searchVideo() {
 	const term = document.getElementById("search").value;
   //api key constricted to domain
-	const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q=${encodeURIComponent(term)}&key=AIzaSyDrDPNaWbkUgyJU95aAA-wvNkHAbhy8P3k`;
+	const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q=${encodeURIComponent(term)}&key=${YOUTUBE_API_KEY}`;
+
 
 	try {
 		const resp = await fetch(url);
