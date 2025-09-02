@@ -86,7 +86,6 @@ async function buscarVideo() {
   }
 }
 
-
     // Función para incrustar el video en un iframe
     function mostrarVideo(video_id) {
       document.getElementById("resultado").innerHTML = `
@@ -114,11 +113,16 @@ async function buscarVideo() {
         //const textoPlano = await response.text(); // primero lo leemos como texto
         //console.log("Respuesta cruda del backend:", textoPlano);
 
-        const data = await response.json();
-        const texto = data.choices[0].message.content;
-        document.getElementById("info_cancion").innerHTML = `<strong>Datos relevantes:</strong><br>${texto}`;
-      } catch(e){
-        console.error("Error", e);
-        document.getElementById("info_cancion").innerHTML = "Error al obtener información de la canción.";
-      }
+            const data = await response.json();
+            const payload = JSON.parse(data.choices[0].message.content);
+            console.log("Datos recibidos de OpenAI:", payload);
+
+    document.getElementById("datos_relevantes").innerHTML =
+      `<p>${payload.datos_relevantes}</p>`;
+
+  } catch (e) {
+    console.error("Error", e);
+    document.getElementById("datos_relevantes").innerHTML =
+      "<p style='color:red'>Error al obtener información de la canción.</p>";
+  }
     }
