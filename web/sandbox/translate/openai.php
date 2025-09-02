@@ -12,9 +12,9 @@ if (!$input) {
     echo json_encode(["error" => "No se recibieron datos válidos"]);
     exit;
 }
-
+// Lang normalization
 $term = $input["search_term"] ?? "";
-$user_lang = substr($input["user_lang"] ?? "en", 0, 2); // normalizar idioma
+$user_lang = substr($input["user_lang"] ?? "en", 0, 2); 
 
 $ch = curl_init("https://api.openai.com/v1/chat/completions");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -23,27 +23,40 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "Authorization: Bearer $api_key_openai"
 ]);
 
-// Le pedimos a OpenAI que responda SOLO en JSON
+// AI Prompt
 $data = [
-    "model" => "gpt-4o-mini",
-    "messages" => [
-        [
-            "role" => "system",
-            "content" => "Eres un experto en música y cultura. Y debes proporcinar la informacion en el idioma definido por el usuario ($user_lang).
-                          Cuando recibas el nombre de una canción debes responder **únicamente en JSON y en el idioma del usuario ($user_lang)** con el formato:
-                          {
-                            \"datos_relevantes\": \"...\",
-
-                          }
-                          - 'datos_relevantes': breve resumen/contexto cultural en el idioma del usuario ($user_lang)."
-        ],
-        [
-            "role" => "user",
-            "content" => "Dame la información de la canción '$term'."
-        ]
-    ],
-    "max_tokens" => 250,
-    "response_format" => ["type" => "json_object"] // fuerza salida en JSON
+	"model" => "gpt-4o-mini",
+	"response_format" => [ "type" => "json_object" ], // Force JSON
+	"messages" => [
+		[
+			"role" => "system",
+			"content" => "You are a music and culture expert. 
+				Always respond strictly in JSON with this structure:
+				{
+					\"relevant_data\": \"...\",
+					\"artist\": \"...\",
+					\"production\": \"...\",
+					\"popularity\": \"...\",
+					\"trivia\": \"...\",
+					\"recommendations\": [\"...\", \"...\"]
+				}
+				
+				Details:
+				- relevant_data: cultural meaning, historical context, significance.
+				- artist: short biography and artist's situation when the song was released.
+				- production: composers, producers, label, and notable technical details.
+				- popularity: charts, awards, streaming/view counts.
+				- trivia: fun facts, anecdotes, covers, appearances in movies/series.
+				- recommendations: array of related songs or artists.
+				
+				All values must be written in the user language ($user_lang)."
+		],
+		[
+			"role" => "user",
+			"content" => "Give me the complete information for the song: '$term'."
+		]
+	],
+	"max_tokens" => 1000
 ];
 
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));

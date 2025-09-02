@@ -1,16 +1,6 @@
 <?php
 include "./envvars.php";
 
-/*
-$api_key_youtube = $_ENV["YOUTUBE_API_KEY"] ?? "";
-$query = $_GET["q"] ?? "";
-
-$url = "https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q=" . urlencode($query) . "&key=" . $api_key_youtube;
-
-header("Content-Type: application/json");
-echo file_get_contents($url);
-
-*/
 $api_key = $_ENV["YOUTUBE_API_KEY"] ?? "";
 $query = $_GET["q"] ?? "";
 
@@ -36,7 +26,7 @@ curl_close($ch);
 
 if ($http_code !== 200) {
     http_response_code($http_code);
-    echo $response; // YouTube devuelve JSON con el error
+    echo $response;
     exit;
 }
 

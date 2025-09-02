@@ -17,79 +17,19 @@
     <main id="main-content" tabindex="-1">
       <p id="description"></p>
       <form id="search-form">
-        <input type="text" id="campo_busqueda" placeholder="Buscar video en YouTube">
-        <button type="submit" id="boton_buscar">Buscar</button>
+        <input type="text" id="search" placeholder="Buscar video en YouTube">
+        <button type="submit" id="submit">Buscar</button>
       </form>
-      <div id="resultado"></div>
-      <div id="datos_relevantes" style="margin-top:20px; font-family: sans-serif;"></div>
-      <div id="letra_original" style="margin-top:20px; font-family: sans-serif;"></div>
-      <div id="traduccion" style="margin-top:20px; font-family: sans-serif;"></div>
+      <div id="result"></div>
+      <div id="relevant_data"></div>
+      <div id="artist"></div>
+      <div id="production"></div>
+      <div id="popularity"></div>
+      <div id="trivia"></div>
+      <div id="recommendations"></div>
 
   <!-- Scripts -->
  <script type="module" src="./app.js"></script>
-  <script>/*
-    
-
-
-    document.getElementById("search-form").addEventListener("submit", function(event) {
-      event.preventDefault();
-      buscarVideo();
-    });
-    
-    async function buscarVideo() {
-      const term = document.getElementById("campo_busqueda").value;
-     const resp = await fetch('youtube.php?q=' + encodeURIComponent(term));
-    const data = await resp.json();
-    console.log("Datos recibidos de YouTube:", data);
-
-        .then(respuesta => respuesta.json())
-        .then(datos => {
-          if (datos.items && datos.items.length > 0) {
-            const video_id = datos.items[0].id.videoId;
-            mostrarVideo(video_id);
-            obtenerInfoCancion(term);
-          } else {
-            document.getElementById("resultado").innerHTML = "No se encontró ningún video.";
-          }
-        })
-        .catch(error => console.error("Error en la búsqueda:", error));
-    }
-
-    // Función para incrustar el video en un iframe
-    function mostrarVideo(video_id) {
-      document.getElementById("resultado").innerHTML = `
-        <iframe width="560" height="315" 
-          src="https://www.youtube.com/embed/${video_id}" 
-          frameborder="0" allowfullscreen>
-        </iframe>
-      `;
-    }
-
-     // Llamada a OpenAI para obtener contexto de la canción
-   async function obtenerInfoCancion(term) {
-    console.log("Obteniendo info de la canción:", term);
-    console.log("Idioma detectado:", localStorage.getItem('lang') || "no detectado");
-      try{
-        const response = await fetch("./openai.php", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            search_term: term,
-            user_lang: localStorage.getItem('lang') || "en"
-          })
-        });
-        //const textoPlano = await response.text(); // primero lo leemos como texto
-        //console.log("Respuesta cruda del backend:", textoPlano);
-
-        const data = await response.json();
-        const texto = data.choices[0].message.content;
-        document.getElementById("info_cancion").innerHTML = `<strong>Datos relevantes:</strong><br>${texto}`;
-      } catch(e){
-        console.error("Error", e);
-        document.getElementById("info_cancion").innerHTML = "Error al obtener información de la canción.";
-      }
-    }*/
-  </script>
       
     </main>
   </div>

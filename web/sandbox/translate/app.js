@@ -1,128 +1,146 @@
 import "./components/dashboard-header-main-content.js";
 import "./components/dashboard-nav-main-content.js";
-//import { detectLanguage, loadTranslations } from "./language-detect.js";
 
-// Language detection
- let lang = (navigator.language || navigator.userLanguage || "not-detected").substring(0,2);
-  let t = {};
+// Detect browser language (normalize to 2 letters)
+let lang = (navigator.language || navigator.userLanguage || "not-detected").substring(0, 2);
+let translations = {};
 
-document.addEventListener('DOMContentLoaded', () => {
-  localStorage.setItem('lang', lang);
+// Store detected language on DOM load
+document.addEventListener("DOMContentLoaded", () => {
+	localStorage.setItem("lang", lang);
 });
 
 // Manual language selection
-const langSelect = document.getElementById('lang-select');
-langSelect.addEventListener('change', (e) => {
-  console.log("Language changed to:", e.target.value);
-  localStorage.setItem('lang', e.target.value);
-  lang = localStorage.getItem('lang');
-  loadTranslations();
+const langSelect = document.getElementById("lang-select");
+langSelect.addEventListener("change", (e) => {
+	console.log("Language changed to:", e.target.value);
+	localStorage.setItem("lang", e.target.value);
+	lang = localStorage.getItem("lang");
+	loadTranslations();
 });
 
-// Load translations
+// Load translations from external file
 async function loadTranslations() {
-    console.log("Detected language:", lang);
-  try {
-    const resp = await fetch("./translations.json");
-    const translations = await resp.json();
-    console.log("Loaded translations:", translations);
-    // fallback a inglés si no existe el idioma
-    t = translations[lang] || translations["en"];
+	console.log("Detected language:", lang);
+	try {
+		const resp = await fetch("./translations.json");
+		const data = await resp.json();
+		console.log("Loaded translations:", data);
 
-    // aplicar a la interfaz
-    document.getElementById("description").innerText = t.description;
-    document.getElementById("campo_busqueda").placeholder = t.placeholder;
-    document.getElementById("boton_buscar").innerText = t.boton;
-  } catch (err) {
-    console.error("Error cargando traducciones:", err);
-  }
+		// Fallback to English if language not available
+		translations = data[lang] || data["en"];
+
+		// Apply translations to UI
+		document.getElementById("description").innerText = translations.description;
+		document.getElementById("search").placeholder = translations.placeholder;
+		document.getElementById("submit").innerText = translations.boton;
+	} catch (err) {
+		console.error("Error loading translations:", err);
+	}
 }
 loadTranslations();
 
-// Detects user theme preference
-const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-const savedTheme = localStorage.getItem('theme');
+// Detect and apply user theme preference
+const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+const savedTheme = localStorage.getItem("theme");
 if (savedTheme) {
-  document.documentElement.setAttribute('data-theme', savedTheme);
+	document.documentElement.setAttribute("data-theme", savedTheme);
 } else {
-  document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+	document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
 }
-//console.log(`Theme set to: ${document.documentElement.getAttribute('data-theme')}`);
 
 // Theme toggle
-document.getElementById('toggle-theme').addEventListener('click', () => {
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('theme', next);
-  
-  console.log(`Theme set to: ${document.documentElement.getAttribute('data-theme')}`);
+document.getElementById("toggle-theme").addEventListener("click", () => {
+	const current = document.documentElement.getAttribute("data-theme");
+	const next = current === "dark" ? "light" : "dark";
+	document.documentElement.setAttribute("data-theme", next);
+	localStorage.setItem("theme", next);
+
+	console.log(`Theme set to: ${document.documentElement.getAttribute("data-theme")}`);
 });
 
-document.getElementById("search-form").addEventListener("submit", function(event) {
-      event.preventDefault();
-      buscarVideo();
-    });
+// Handle form submit for video search
+document.getElementById("search-form").addEventListener("submit", (event) => {
+	event.preventDefault();
+	searchVideo();
+});
 
-// al terminar de cargar el DOM
-    // Función para buscar video en YouTube
+// Global variable to store video title
 let videoTitle;
-async function buscarVideo() {
-  const term = document.getElementById("campo_busqueda").value;
-  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q=${encodeURIComponent(term)}&key=AIzaSyAEOnD5QCqHOghjuG59htpuHK7cR4cjXfE`;
-  
-  const resp = await fetch(url);
-  const data = await resp.json();
 
-  if (data.items && data.items.length > 0) {
-    const videoId = data.items[0].id.videoId;
-    videoTitle = data.items[0].snippet.title;
-    console.log("Video ID:", data);
-    
-    mostrarVideo(videoId);
-    obtenerInfoCancion(term);
-  } else {
-    document.getElementById("resultado").innerHTML = "No se encontró video.";
-  }
+// Search YouTube video
+async function searchVideo() {
+	const term = document.getElementById("search").value;
+  //referrer constricted by domain
+	const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q=${encodeURIComponent(term)}&key=AIzaSyAEOnD5QCqHOghjuG59htpuHK7cR4cjXfE`;
+
+	try {
+		const resp = await fetch(url);
+		const data = await resp.json();
+
+		if (data.items && data.items.length > 0) {
+			const videoId = data.items[0].id.videoId;
+			videoTitle = data.items[0].snippet.title;
+
+			console.log("YouTube response:", data);
+			showVideo(videoId);
+			getSongInfo(term);
+		} else {
+			document.getElementById("result").innerHTML = "<p>No video found.</p>";
+		}
+	} catch (err) {
+		console.error("Error fetching YouTube data:", err);
+		document.getElementById("result").innerHTML = "<p style='color:red'>Error fetching video.</p>";
+	}
 }
 
-    // Función para incrustar el video en un iframe
-    function mostrarVideo(video_id) {
-      document.getElementById("resultado").innerHTML = `
-        <iframe width="720" height="480" 
-          src="https://www.youtube.com/embed/${video_id}" 
-          frameborder="0" allowfullscreen>
-        </iframe>
-      `;
-    }
+// Embed YouTube video in iframe
+function showVideo(videoId) {
+	document.getElementById("result").innerHTML = `
+		<iframe width="720" height="480"
+			src="https://www.youtube.com/embed/${videoId}"
+			frameborder="0" allowfullscreen>
+		</iframe>
+	`;
+}
 
-     // Llamada a OpenAI para obtener contexto de la canción
-   async function obtenerInfoCancion(term) {
-    console.log("Video encontrado:", videoTitle);
-    console.log("Obteniendo info de la canción:", term);
-    console.log("Idioma detectado:", localStorage.getItem('lang') || "no detectado");
-      try{
-        const response = await fetch("./openai.php", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            search_term: term,
-            user_lang: localStorage.getItem('lang') || "en"
-          })
-        });
-        //const textoPlano = await response.text(); // primero lo leemos como texto
-        //console.log("Respuesta cruda del backend:", textoPlano);
+async function getSongInfo(term) {
+	console.log("Fetching song info for:", term);
 
-            const data = await response.json();
-            const payload = JSON.parse(data.choices[0].message.content);
-            console.log("Datos recibidos de OpenAI:", payload);
+	try {
+		const response = await fetch("./openai.php", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				search_term: term,
+				user_lang: localStorage.getItem("lang") || "en"
+			})
+		});
 
-    document.getElementById("datos_relevantes").innerHTML =
-      `<p>${payload.datos_relevantes}</p>`;
+		const data = await response.json();
+		const payload = JSON.parse(data.choices[0].message.content);
+		console.log("Data received from OpenAI:", payload);
 
-  } catch (e) {
-    console.error("Error", e);
-    document.getElementById("datos_relevantes").innerHTML =
-      "<p style='color:red'>Error al obtener información de la canción.</p>";
-  }
-    }
+		// Update UI with each section
+		document.getElementById("relevant_data").innerHTML = `<h3>Context</h3><p>${payload.relevant_data}</p>`;
+    // h3 titles from translations.json based on detected language
+    document.getElementById("relevant_data").innerHTML = `<h3>${translations.relevant_info}</h3><p>${payload.relevant_data}</p>`;
+
+		document.getElementById("artist").innerHTML = `<h3>${translations.artist}</h3><p>${payload.artist}</p>`;
+		document.getElementById("production").innerHTML = `<h3>${translations.production}</h3><p>${payload.production}</p>`;
+		document.getElementById("popularity").innerHTML = `<h3>${translations.popularity}</h3><p>${payload.popularidad}</p>`;
+		document.getElementById("trivia").innerHTML = `<h3>${translations.trivia}</h3><p>${payload.curiosidades}</p>`;
+
+		if (payload.recommendations && payload.recommendations.length > 0) {
+			document.getElementById("recommendations").innerHTML =
+				`<h3>${translations.recommendations}</h3><ul>${payload.recommendations.map(r => `<li>${r}</li>`).join("")}</ul>`;
+		} else {
+			document.getElementById("recommendations").innerHTML = "";
+		}
+
+	} catch (err) {
+		console.error("Error fetching OpenAI data:", err);
+		document.getElementById("relevant_data").innerHTML =
+			"<p style='color:red'>Error fetching song info.</p>";
+	}
+}
