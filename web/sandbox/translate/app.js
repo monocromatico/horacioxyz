@@ -106,7 +106,7 @@ function showVideo(videoId) {
 
 async function getSongInfo(term) {
 	console.log("Fetching song info for:", term);
-
+  showLoader();
 	try {
 		const response = await fetch("./openai.php", {
 			method: "POST",
@@ -118,6 +118,7 @@ async function getSongInfo(term) {
 		});
 
 		const data = await response.json();
+    console.log("Data received from OpenAI:", data);
 		const payload = JSON.parse(data.choices[0].message.content);
 		console.log("Data received from OpenAI:", payload);
 
@@ -142,5 +143,16 @@ async function getSongInfo(term) {
 		console.error("Error fetching OpenAI data:", err);
 		document.getElementById("relevant_data").innerHTML =
 			"<p style='color:red'>Error fetching song info.</p>";
-	}
+	} finally {
+    hideLoader();
+  }
+}
+
+
+function showLoader() {
+	document.getElementById("loader").style.display = "flex";
+}
+
+function hideLoader() {
+	document.getElementById("loader").style.display = "none";
 }

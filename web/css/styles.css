@@ -759,18 +759,11 @@ ul li::before {
   color: #333;
   font-family: "Source Sans 3", sans-serif;
   font-size: 12pt;
+  margin: 0;
 }
 .resume .container {
   margin: 0 auto;
   max-width: 1020px;
-}
-.resume .container.page {
-  padding: 5rem;
-}
-@media (max-width: 1024px) {
-  .resume .container {
-    padding: 2rem;
-  }
 }
 .resume h1 {
   color: #333;
