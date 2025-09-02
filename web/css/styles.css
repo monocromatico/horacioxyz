@@ -333,124 +333,6 @@ body {
   display: none;
 }
 
-body {
-  font-size: 12pt;
-  color: #333;
-}
-
-p {
-  margin-top: 0;
-  margin-bottom: 1.25rem;
-  line-height: 1.25rem;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  margin: 0;
-  padding: 0;
-  margin-bottom: 1.2rem;
-  font-weight: 600;
-}
-
-/*body{
-    background:red;
-}*/
-.home {
-  margin: 0 !important;
-  padding: 0 !important;
-  color: black;
-}
-.home h1 {
-  font-weight: 500;
-  margin-top: 0;
-  font-size: 5vw;
-  margin-bottom: 0.1rem;
-  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial, sans-serif;
-  font-weight: 800;
-}
-.home h2 {
-  font-weight: 500;
-  font-size: 2.8vw;
-  font-family: monospace;
-}
-.home a {
-  margin-right: 2rem;
-}
-.home ul {
-  list-style: none;
-  padding-left: 0;
-  display: flex;
-  flex-flow: row;
-}
-.home ul li {
-  margin-bottom: 0.5rem;
-  font-size: 1rem;
-}
-.home ul li a {
-  font-size: 13pt;
-  font-family: monospace;
-}
-
-.resume {
-  background: black;
-  color: #333;
-  font-family: "Source Sans 3", sans-serif;
-  font-size: 12pt;
-}
-.resume .container {
-  margin: 0 auto;
-  max-width: 1020px;
-}
-.resume .container.page {
-  padding: 5rem;
-}
-@media (max-width: 1024px) {
-  .resume .container {
-    padding: 2rem;
-  }
-}
-.resume h1 {
-  color: #333;
-  margin-bottom: 0.5rem;
-  font-size: 28pt;
-  font-family: "Source Sans 3", sans-serif;
-  text-transform: uppercase;
-  font-weight: 600;
-  line-height: 32pt;
-  letter-spacing: -2px;
-}
-.resume h3 {
-  font-size: 1.3rem;
-}
-.resume strong {
-  font-weight: 600;
-  line-height: 1.5rem;
-}
-.resume p.ff-monospace {
-  margin-bottom: 0.5rem;
-  line-height: 1.5rem;
-}
-.resume a {
-  color: #000000;
-}
-.resume ul {
-  list-style: none;
-  padding-left: 0rem;
-}
-.resume ul li {
-  margin-bottom: 0.05rem;
-  font-size: 1rem;
-}
-.resume ul li::before {
-  content: "−";
-  color: black;
-  font-weight: bold;
-  display: inline-block;
-  width: 1rem;
-  position: relative;
-  margin-left: 0rem;
-}
-
-/* Font sizes fs-XX*/
 .fs-1 {
   font-size: 1pt;
 }
@@ -776,6 +658,129 @@ h1, h2, h3, h4, h5, h6 {
 
 .bg-white {
   background: white;
+}
+
+body {
+  font-size: 12pt;
+  color: #333;
+  font-family: "Source Sans 3", sans-serif;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  line-height: 1.25rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  padding: 0;
+  margin-bottom: 1.2rem;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: 1.3rem;
+}
+
+strong {
+  font-weight: 600;
+  line-height: 1.5rem;
+}
+
+p.ff-monospace {
+  margin-bottom: 0.5rem;
+  line-height: 1.5rem;
+}
+
+a {
+  color: #000000;
+}
+
+ul {
+  list-style: none;
+  padding-left: 0rem;
+}
+ul li {
+  margin-bottom: 0.05rem;
+  font-size: 1rem;
+}
+ul li::before {
+  content: "−";
+  color: black;
+  font-weight: bold;
+  display: inline-block;
+  width: 1rem;
+  position: relative;
+  margin-left: 0rem;
+}
+
+/*body{
+    background:red;
+}*/
+.home {
+  margin: 0 !important;
+  padding: 0 !important;
+  color: black;
+}
+.home h1 {
+  font-weight: 500;
+  margin-top: 0;
+  font-size: 5vw;
+  margin-bottom: 0.1rem;
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial, sans-serif;
+  font-weight: 800;
+}
+.home h2 {
+  font-weight: 500;
+  font-size: 2.8vw;
+  font-family: monospace;
+}
+.home a {
+  margin-right: 2rem;
+}
+.home ul {
+  list-style: none;
+  padding-left: 0;
+  display: flex;
+  flex-flow: row;
+}
+.home ul li {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+.home ul li a {
+  font-size: 13pt;
+  font-family: monospace;
+}
+
+.resume {
+  background: black;
+  color: #333;
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 12pt;
+}
+.resume .container {
+  margin: 0 auto;
+  max-width: 1020px;
+}
+.resume .container.page {
+  padding: 5rem;
+}
+@media (max-width: 1024px) {
+  .resume .container {
+    padding: 2rem;
+  }
+}
+.resume h1 {
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 28pt;
+  font-family: "Source Sans 3", sans-serif;
+  text-transform: uppercase;
+  font-weight: 600;
+  line-height: 32pt;
+  letter-spacing: -2px;
 }
 
 /*# sourceMappingURL=styles.css.map */

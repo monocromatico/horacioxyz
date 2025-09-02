@@ -33,7 +33,7 @@ async function loadTranslations() {
 		// Apply translations to UI
 		document.getElementById("description").innerText = translations.description;
 		document.getElementById("search").placeholder = translations.placeholder;
-		document.getElementById("submit").innerText = translations.boton;
+		//document.getElementById("submit").innerText = translations.boton;
 	} catch (err) {
 		console.error("Error loading translations:", err);
 	}
@@ -71,8 +71,8 @@ let videoTitle;
 // Search YouTube video
 async function searchVideo() {
 	const term = document.getElementById("search").value;
-  //referrer constricted by domain
-	const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q=${encodeURIComponent(term)}&key=AIzaSyAEOnD5QCqHOghjuG59htpuHK7cR4cjXfE`;
+  //api key constricted to domain
+	const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q=${encodeURIComponent(term)}&key=AIzaSyDrDPNaWbkUgyJU95aAA-wvNkHAbhy8P3k`;
 
 	try {
 		const resp = await fetch(url);
@@ -128,8 +128,8 @@ async function getSongInfo(term) {
 
 		document.getElementById("artist").innerHTML = `<h3>${translations.artist}</h3><p>${payload.artist}</p>`;
 		document.getElementById("production").innerHTML = `<h3>${translations.production}</h3><p>${payload.production}</p>`;
-		document.getElementById("popularity").innerHTML = `<h3>${translations.popularity}</h3><p>${payload.popularidad}</p>`;
-		document.getElementById("trivia").innerHTML = `<h3>${translations.trivia}</h3><p>${payload.curiosidades}</p>`;
+		document.getElementById("popularity").innerHTML = `<h3>${translations.popularity}</h3><p>${payload.popularity}</p>`;
+		document.getElementById("trivia").innerHTML = `<h3>${translations.trivia}</h3><p>${payload.trivia}</p>`;
 
 		if (payload.recommendations && payload.recommendations.length > 0) {
 			document.getElementById("recommendations").innerHTML =

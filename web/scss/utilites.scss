@@ -69,3 +69,36 @@ $spacing-values: (
 .d-inline{ display: inline; }
 .d-inline-block{ display: inline-block; }
 .d-none{ display: none; }
+
+// Font size utilites fs-XX
+
+@for $i from 1 through 64 {
+    .fs-#{$i} {
+      font-size: #{$i}pt;
+    }
+  }
+
+/* Font weights fw-XX*/
+@for $i from 1 through 9 {
+    .fw-#{$i * 100} {
+        font-weight: #{$i * 100};
+    }
+}
+
+.d-none-print{
+    @media print {
+        display: none!important;;
+    }
+}
+
+
+.ff-monospace{ font-family:monospace; }
+
+.fw-normal{ font-weight:400; }
+.fw-bold{ font-weight:600; }
+
+.ff-libre, .ff-baskerville, .ff-libre-baskerville{ font-family:"Source Sans 3", sans-serif; }
+.ff-source-sans{ font-family:"Source Sans 3", sans-serif; }
+.color-gray{ color:#555; }
+
+.bg-white{ background:white; }

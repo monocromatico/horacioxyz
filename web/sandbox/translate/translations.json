@@ -1,6 +1,6 @@
 {
   "es": {
-    "placeholder": "Buscar canción en YouTube",
+    "placeholder": "Ex: Labrinth, Mount Everest",
     "boton": "Buscar",
     "no_resultados": "No se encontró ningún video.",
     "relevant_info": "Datos relevantes:",
@@ -13,7 +13,7 @@
     "recommendations":"Recomendaciones"
   },
   "en": {
-    "placeholder": "Search song on YouTube",
+    "placeholder": "Ex: Labrinth, Mount Everest",
     "boton": "Search",
     "no_resultados": "No video found.",
     "relevant_info": "Relevant data:",
@@ -26,7 +26,7 @@
     "recommendations":"Recommendations"
   },
   "fr": {
-    "placeholder": "Chercher une chanson sur YouTube",
+    "placeholder": "Ex: Labrinth, Mount Everest",
     "boton": "Rechercher",
     "no_resultados": "Aucune vidéo trouvée.",
     "relevant_info": "Données pertinentes:",
@@ -39,7 +39,7 @@
     "recommendations":"Recommandations"
   },
   "hi": {
-    "placeholder": "YouTube पर गाना खोजें",
+    "placeholder": "Ex: Labrinth, Mount Everest",
     "boton": "खोजें",
     "no_resultados": "कोई वीडियो नहीं मिला।",
     "relevant_info": "प्रासंगिक जानकारी:",
@@ -52,7 +52,7 @@
     "recommendations":"सिफारिशें"
   },
   "de": {
-    "placeholder": "Lied auf YouTube suchen",
+    "placeholder": "Ex: Labrinth, Mount Everest",
     "boton": "Suchen",
     "no_resultados": "Kein Video gefunden.",
     "relevant_info": "Relevante Daten:",
