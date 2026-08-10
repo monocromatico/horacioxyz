@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Comparativa Animaciones CPU vs GPU</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 100vh;
+      font-family: sans-serif;
+    }
+
+    .contenedor {
+      text-align: center;
+      width: 45%;
+    }
+
+    .caja {
+      width: 80px;
+      height: 80px;
+      background: crimson;
+      position: relative;
+    }
+
+    /* CPU-heavy: mueve con top (fuerza layout/repaint) */
+    .cpu .caja {
+      animation: moverCpu 2s infinite alternate linear;
+    }
+
+    @keyframes moverCpu {
+      from { top: 0px; }
+      to { top: 300px; }
+    }
+
+    /* GPU-friendly: mueve con transform */
+    .gpu .caja {
+      animation: moverGpu 2s infinite alternate linear;
+      will-change: transform; /* hint al navegador */
+    }
+
+    @keyframes moverGpu {
+      from { transform: translate3d(0, 0, 0); }
+      to { transform: translate3d(0, 300px, 0); }
+    }
+
+    h2 {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="contenedor cpu">
+    <h2>Animación CPU (top)</h2>
+    <div class="caja"></div>
+  </div>
+
+  <div class="contenedor gpu">
+    <h2>Animación GPU (transform)</h2>
+    <div class="caja"></div>
+  </div>
+</body>
+</html>

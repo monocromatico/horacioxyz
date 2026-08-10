@@ -1,8 +1,68 @@
+@font-face {
+    font-family: "Inter";
+    src: url("../assets/fonts/Inter-VariableFont_opsz,wght.ttf") format("truetype");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("../assets/fonts/IBMPlexMono-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("../assets/fonts/IBMPlexMono-Medium.ttf") format("truetype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("../assets/fonts/IBMPlexMono-SemiBold.ttf") format("truetype");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+$font-weights: 100, 200, 300, 400, 500, 600, 700, 800, 900;
+$mono-weights: 400, 500, 600;
+
+@each $weight in $font-weights {
+    .ff-ibm-plex-sans-#{$weight} {
+        font-family: "IBM Plex Sans", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: $weight;
+        font-style: normal;
+        font-variation-settings: "wdth" 100;
+    }
+    
+    .ff-inter-#{$weight} {
+        font-family: "Inter", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: $weight;
+        font-style: normal;
+    }
+}
+
+@each $weight in $mono-weights {
+    .ff-monospace-#{$weight},
+    .ff-ibm-plex-mono-#{$weight} {
+        font-family: "IBM Plex Mono", monospace;
+        font-weight: $weight;
+        font-style: normal;
+    }
+}
 
 body{
     font-size:12pt;
     color: #333;
-    font-family:'Source Sans 3', sans-serif;
+    font-family:'Inter', sans-serif;
 }
 
 p{
@@ -17,25 +77,28 @@ h1,h2,h3,h4,h5,h6{
   margin-bottom:1.2rem;
   font-weight:600;
 }
+
 h3{font-size:1.3rem}
+
 strong{
     font-weight:600;
     line-height:1.5rem;
 }
-p.ff-monospace{
+.ff-monospace{
     margin-bottom:0.5rem;
     line-height:1.5rem;
 }
 a{
     color:#000000
 }
+
 ul{
     list-style:none;
     padding-left:0rem;
     li{
         margin-bottom:0.05rem;
         font-size:1rem;
-        
+        /*
         &::before{
             content: '−';
             color: black;
@@ -45,6 +108,48 @@ ul{
             position:relative;
             margin-left: 0rem;
         }
-        
+        */
     }
 }
+
+.card{
+    padding:0.5rem;
+    display: flex;
+    flex-flow:column
+}
+.navigation{
+    display:flex;
+    flex-flow:row;
+    justify-content:space-between;
+    // and or container
+    nav{
+        display:flex;
+        flex-flow:row;
+        justify-content:space-between;
+    .navbar{
+        display:flex;
+        flex-flow:row;
+        justify-content:space-between;
+        
+            ul{
+                list-style:none;
+                padding-left:0rem;
+                li{
+                    display:inline-block;
+                    margin-right:1rem;
+                    a{
+                        text-decoration:none;
+                        font-family: "IBM Plex Mono", monospace;
+                        font-weight:500;
+                        font-size:10pt;
+                        &:hover{
+                            text-decoration:underline;
+                        }
+                    }
+                }
+            }
+        
+    }
+    }
+}
+

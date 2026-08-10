@@ -1,12 +1,38 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>/etc</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        @page{ 
+            size: auto;   /* auto is the initial value */ 
+
+            /* this affects the margin in the printer settings */ 
+            margin: 25mm 20mm 25mm 20mm;  
+        } 
+        </style>
 </head>
-<body>
-    <p>whatever I found interesting, I will add it here later.</p>
+<body class="etc page">
+    <div class="navigation d-none-print bg-dark">
+        <!-- @todo pdf print integration for on the fly resume generation-->
+        <nav class="container p-0">
+            <nav-main></nav-main>
+        </nav>
+    </div>
+    <div class="row">
+        <div class="page container bg-white">
+            <div class="col-12 col-12 pt-2 pt-md-4 pl-3 pr-3 pl-md-0 pr-md-0 pb-3">
+                whatever i found interesting and wanted to share, or just a place to dump some code snippets.
+            </div>
+        </div>
+    </div>
+
+    <footer></footer> 
+    <script src="/js/script.js"></script>
+    <script type="module" src="/components/nav-main.js"></script>
+    <script type="module" src="/components/footer.js"></script>
+    
 </body>
 </html>

@@ -30,6 +30,19 @@ body{
     flex-flow: row;
     box-sizing: border-box;
 }
+
+.container-fluid{
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.container-large{
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
 .container{
     width: 100%;
     max-width: 1200px;
@@ -44,6 +57,14 @@ $spacing-values: (
   3: 1rem,
   4: 1.5rem,
   5: 3rem
+);
+
+$breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px
 );
 
 // Generar clases de margen
@@ -64,11 +85,41 @@ $spacing-values: (
   .pr-#{$key} { padding-right: $value!important; }
 }
 
+// Generar clases responsivas de margen y padding por breakpoint
+@each $bp, $min-width in $breakpoints {
+  @media (min-width: $min-width) {
+    @each $key, $value in $spacing-values {
+      .m-#{$bp}-#{$key} { margin: $value!important; }
+      .mt-#{$bp}-#{$key} { margin-top: $value!important; }
+      .mb-#{$bp}-#{$key} { margin-bottom: $value!important; }
+      .ml-#{$bp}-#{$key} { margin-left: $value!important; }
+      .mr-#{$bp}-#{$key} { margin-right: $value!important; }
+
+      .p-#{$bp}-#{$key} { padding: $value!important; }
+      .pt-#{$bp}-#{$key} { padding-top: $value!important; }
+      .pb-#{$bp}-#{$key} { padding-bottom: $value!important; }
+      .pl-#{$bp}-#{$key} { padding-left: $value!important; }
+      .pr-#{$bp}-#{$key} { padding-right: $value!important; }
+    }
+  }
+}
+
 .d-flex{ display: flex; }
 .d-block{ display: block; }
 .d-inline{ display: inline; }
 .d-inline-block{ display: inline-block; }
 .d-none{ display: none; }
+
+// Generar clases responsivas de display por breakpoint
+@each $bp, $min-width in $breakpoints {
+  @media (min-width: $min-width) {
+    .d-#{$bp}-flex { display: flex!important; }
+    .d-#{$bp}-block { display: block!important; }
+    .d-#{$bp}-inline { display: inline!important; }
+    .d-#{$bp}-inline-block { display: inline-block!important; }
+    .d-#{$bp}-none { display: none!important; }
+  }
+}
 
 // Font size utilites fs-XX
 
@@ -91,7 +142,7 @@ $spacing-values: (
     }
 }
 
-
+.text-uppercase{ text-transform: uppercase; }
 .ff-monospace{ font-family:monospace; }
 
 .fw-normal{ font-weight:400; }
@@ -101,4 +152,46 @@ $spacing-values: (
 .ff-source-sans{ font-family:"Source Sans 3", sans-serif; }
 .color-gray{ color:#555; }
 
+.btn{
+    display: inline-block;
+    padding: 0.25rem .5rem;
+    text-decoration: none;
+    border:1px solid;
+    border-radius: 100px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+.bg-dark{ 
+    background:#111;
+    h1,h2,h3,p,a { color:#fff; }
+    .btn{ 
+        
+        color:#fff;
+        border:1px solid #fff;
+        &:hover{ 
+            background:#fff; 
+            color:#000; 
+        
+        }
+    }
+}
+.bg-light{ 
+    background:#fff;
+    h1,h2,h3,p,a { color:#333; }
+    .btn{ 
+        background:#333; 
+        color:#fff; 
+        border:1px solid #333;
+        &:hover{ 
+            background:#555; 
+            color:#fff; 
+        }
+    }
+}
+
 .bg-white{ background:white; }
+
+.image-fluid{
+  width:100%;
+    max-width:100%;
+    height:auto;
+}

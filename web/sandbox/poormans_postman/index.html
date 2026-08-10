@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Poorman's Postman</title>i
+  <style>
+    body { font-family: monospace; margin: 20px; background: #111; color: #eee; }
+    label { display: block; margin-top: 10px; font-weight: bold; }
+    textarea, input, select {
+      width: 100%; margin-top: 5px; padding: 10px;
+      background: #222; color: #0f0; border: 1px solid #444; font-family: monospace;
+    }
+    button {
+      margin-top: 15px; padding: 10px 20px;
+      background: #0f0; color: #000; border: none; font-weight: bold; cursor: pointer;
+    }
+    pre { white-space: pre-wrap; background: #222; padding: 10px; border: 1px solid #444; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Poorman's Postman</h1>
+
+  <label>Endpoint:</label>
+  <input type="text" id="url" value="https://jsonplaceholder.typicode.com/posts" />
+
+  <label>Método HTTP:</label>
+  <select id="method">
+    <option>GET</option>
+    <option>POST</option>
+    <option>PUT</option>
+    <option>PATCH</option>
+    <option>DELETE</option>
+  </select>
+
+  <label>Headers (JSON):</label>
+  <textarea id="headers" rows="5">{ "Content-Type": "application/json" }</textarea>
+
+  <label>Body (raw JSON):</label>
+  <textarea id="body" rows="5">{ "title": "foo", "body": "bar", "userId": 1 }</textarea>
+
+  <button onclick="sendRequest()">Enviar Request</button>
+
+  <h2>Response:</h2>
+  <pre id="response">Esperando respuesta...</pre>
+
+  <script>
+    async function sendRequest() {
+      const url = document.getElementById('url').value;
+      const method = document.getElementById('method').value;
+      let headers = {};
+      let body = null;
+
+      try {
+        headers = JSON.parse(document.getElementById('headers').value || '{}');
+      } catch (err) {
+        return document.getElementById('response').textContent = '⚠️ Headers JSON inválido';
+      }
+
+      if (['POST', 'PUT', 'PATCH'].includes(method)) {
+        try {
+          body = JSON.parse(document.getElementById('body').value || '{}');
+        } catch (err) {
+          return document.getElementById('response').textContent = '⚠️ Body JSON inválido';
+        }
+      }
+
+      try {
+	//console.table("Request", url, method, headers, body);
+        const res = await fetch(url, {
+          method,
+          headers,
+          body: body ? JSON.stringify(body) : undefined
+        });
+
+        const contentType = res.headers.get("content-type");
+        const result = contentType && contentType.includes("application/json")
+          ? await res.json()
+          : await res.text();
+
+        document.getElementById('response').textContent =
+          `✅ Status: ${res.status} ${res.statusText}\n\n` +
+          (typeof result === 'object' ? JSON.stringify(result, null, 2) : result);
+      } catch (err) {
+        document.getElementById('response').textContent = '❌ Error: ' + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
+
