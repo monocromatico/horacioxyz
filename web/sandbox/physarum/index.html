@@ -101,8 +101,8 @@
   <div id="intro">
     <span class="close" onclick="document.getElementById('intro').style.display='none'">✕</span>
     <h1>Moho mucilaginoso (Physarum)</h1>
-    Miles de partículas con 3 "ojos" que huelen un rastro químico, giran hacia donde huele más fuerte, y dejan su propio rastro al pasar. Con eso alcanza para que la mancha explore en brazos delgados y converja donde hay <b class="f">comida</b>.
-    <br><br>Cada partícula tiene <b>energía finita</b>: moverse cuesta, y sin comer se va quedando lenta hasta casi paralizarse — nunca muere del todo. El color se enfría de dorado a gris-azulado según le queda energía, así se ve a simple vista qué zonas están activas y cuáles dormidas. Si aparece comida muy cerca de una zona paralizada, alcanza a arrastrarse esos últimos pasos y "revive" al toque. El punto <b class="h">celeste</b> marca el origen de la colonia.
+    Partículas con 3 "ojos" que huelen un rastro químico, giran hacia donde huele más fuerte, y dejan su propio rastro al pasar. Con eso alcanza para que la mancha explore en brazos delgados y converja donde hay <b class="f">comida</b>.
+    <br><br>La colonia arranca chica y <b>crece</b> comiendo: al alimentarse bien, a veces "brota" una partícula nueva ahí mismo, hasta llegar al techo de población. Cada partícula tiene energía finita — moverse cuesta, y sin comer se va quedando lenta hasta casi paralizarse, nunca muere del todo. El color se enfría de dorado a gris-azulado según le queda energía, y esas zonas paralizadas casi no se evaporan: quedan visibles como cicatriz azulada en vez de desaparecer. Si aparece comida muy cerca, alcanza a arrastrarse y "revive" al toque. El punto <b class="h">celeste</b> marca el origen de la colonia.
     <br><br>Clic para poner comida. 🔗 copiar enlace comparte esta configuración exacta.
   </div>
 
@@ -110,6 +110,7 @@
   <div id="toast"></div>
 
   <div id="stats">
+    población: <b id="s-pop">0</b><br>
     dormidos: <b id="s-agents">0</b><br>
     comida restante: <b id="s-food">0%</b><br>
     semilla: <b id="s-seed">—</b><br>
@@ -130,8 +131,8 @@
 
     <div class="sep"></div>
 
-    <div class="ctrl" data-tip="Cantidad de partículas simuladas. Más agentes = mancha más densa y estructuras más gruesas (pero más carga). Menos agentes = hilos individuales bien visibles, más ralo.">
-      <label>Agentes <span class="val" id="v-agents">7000</span></label>
+    <div class="ctrl" data-tip="Techo máximo de población, no la cantidad inicial. La colonia arranca con una fracción chica y va “brotando” nuevas partículas cada vez que una se alimenta bien, hasta llegar a este límite.">
+      <label>Agentes (techo) <span class="val" id="v-agents">7000</span></label>
       <input id="agents" type="range" min="1000" max="18000" step="500" value="7000">
     </div>
     <div class="ctrl" data-tip="Cuánto se abren los 3 “ojos” (izq/centro/der) respecto a hacia dónde mira la partícula. Angosto = sigue el rastro muy fiel, líneas finas y derechas. Ancho = detecta cosas a los costados antes, más ramificado y curvo.">
@@ -267,7 +268,11 @@ const LIFE_MAX = 140;
 const LIFE_GAIN = 45;
 const MIN_MOBILITY = 0.05;   // never fully frozen — can still creep onto adjacent food
 const DORMANT_THRESHOLD = 0.15;
-let numAgents = 7000;
+const INITIAL_FRACTION = 0.25; // colony starts as a fraction of the population cap...
+const REPRO_CHANCE = 0.12;     // ...and grows toward it by "budding" when well-fed
+const REPRO_COST = LIFE_MAX*0.18;
+let numAgents = 7000;    // population CEILING (the "Agentes" slider)
+let bornCount = 0;       // how many of that ceiling are actually alive right now
 let ax, ay, aH, aBoost, aLife;
 let dormantCount = 0;
 let colonyAwake = true;
@@ -280,7 +285,9 @@ function spawnAgentsCentered(n){
   const cx = gridW/2, cy = gridH/2;
   homeGX = cx; homeGY = cy;
   const rad = Math.min(gridW,gridH)*0.09;
+  bornCount = Math.max(30, Math.round(n*INITIAL_FRACTION));
   for (let i=0;i<n;i++){
+    if (i >= bornCount){ aLife[i] = -1; continue; } // not born yet — waiting to be "budded off"
     const a = rng()*Math.PI*2;
     const r = Math.sqrt(rng())*rad;
     ax[i] = cx + Math.cos(a)*r;
@@ -462,6 +469,8 @@ function stepAgents(){
   let dormant = 0;
 
   for (let i=0;i<numAgents;i++){
+    if (aLife[i] < 0) continue; // not born yet
+
     let heading = aH[i];
     const x = ax[i], y = ay[i];
 
@@ -509,6 +518,17 @@ function stepAgents(){
       aBoost[i] = BOOST_FRAMES;
       aLife[i] = Math.min(LIFE_MAX, aLife[i] + LIFE_GAIN);
       food[idx] = Math.max(0, food[idx]-CONSUME_RATE);
+
+      // well-fed agents occasionally "bud off" a new one — the colony grows toward its cap
+      if (bornCount < numAgents && rng() < REPRO_CHANCE){
+        const j = bornCount++;
+        let bx = nx + (rng()-0.5)*3, by = ny + (rng()-0.5)*3;
+        if (bx<0) bx+=gridW; else if (bx>=gridW) bx-=gridW;
+        if (by<0) by+=gridH; else if (by>=gridH) by-=gridH;
+        ax[j]=bx; ay[j]=by; aH[j]=rng()*Math.PI*2; aBoost[j]=0;
+        aLife[j] = LIFE_MAX*0.55;
+        aLife[i] = Math.max(0, aLife[i]-REPRO_COST); // budding costs the parent some reserve
+      }
     }
 
     const metaCost = metaBase * effSS; // moving farther costs more energy
@@ -518,16 +538,16 @@ function stepAgents(){
   }
 
   dormantCount = dormant;
-  if (dormant >= numAgents && colonyAwake){
+  if (dormant >= bornCount && colonyAwake){
     colonyAwake = false;
     showToast('toda la colonia está paralizada — necesita comida cerca para reactivarse', true);
-  } else if (dormant < numAgents*0.9){
+  } else if (dormant < bornCount*0.9){
     colonyAwake = true;
   }
 }
 
 function diffuseTrail(){
-  const decayMul = 1 - parseFloat(decayEl.value)/100;
+  const baseDecay = parseFloat(decayEl.value)/100;
   const diffuseAmt = 0.55;
   for (let y=0;y<gridH;y++){
     const yUp=((y-1+gridH)%gridH)*gridW, yDn=((y+1)%gridH)*gridW, yC=y*gridW;
@@ -539,10 +559,12 @@ function diffuseTrail(){
   const total = gridW*gridH;
   for (let i=0;i<total;i++){
     let v = trail[i]*(1-diffuseAmt) + blurBuf[i]*diffuseAmt;
-    v *= decayMul;
+    // dormant (low-vitality) trail evaporates much slower — it stays visible, just cool-colored,
+    // instead of fading to black like an actively-abandoned healthy path does.
+    const vv = vitality[i]<0?0:(vitality[i]>1?1:vitality[i]);
+    const effDecay = baseDecay * (0.1 + 0.9*vv);
+    v *= (1-effDecay);
     trail[i] = v>0.01 ? v : 0;
-    // vitality slowly relaxes back to "healthy" when a cell hasn't been visited in a while
-    vitality[i] += (1-vitality[i])*0.01;
   }
 }
 
@@ -606,9 +628,10 @@ function loop(now){
     diffuseTrail();
     stepCount++;
     el('s-step').textContent = stepCount;
+    el('s-pop').textContent = bornCount + ' / ' + numAgents;
     const agentsStat = el('s-agents');
-    agentsStat.textContent = dormantCount + ' / ' + numAgents;
-    agentsStat.className = dormantCount>=numAgents ? 'dead' : '';
+    agentsStat.textContent = dormantCount + ' / ' + bornCount;
+    agentsStat.className = dormantCount>=bornCount ? 'dead' : '';
     let fm=0; for (let i=0;i<food.length;i++) fm+=food[i];
     el('s-food').textContent = Math.round(Math.min(100,(fm/initialFoodMass)*100))+'%';
   }
