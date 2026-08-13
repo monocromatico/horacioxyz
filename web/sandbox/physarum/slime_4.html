@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Moho mucilaginoso — Physarum</title>
+<style>
+  :root{
+    --bg:#06070a;
+    --panel:#11141b;
+    --panel-border:#242832;
+    --text:#e6e0d4;
+    --muted:#8a8578;
+    --accent:#d8a752;
+    --food:#c6e0a8;
+    --pred:#c2413f;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);overflow:hidden;}
+  #wrap{position:relative;width:100vw;height:100vh;}
+  canvas{display:block;background:var(--bg);}
+  #view{position:absolute; inset:0; cursor:crosshair;}
+
+  #intro{
+    position:absolute; top:16px; left:16px; max-width:360px; z-index:15;
+    background:rgba(17,20,27,0.88); backdrop-filter:blur(8px);
+    border:1px solid var(--panel-border); border-radius:12px;
+    padding:14px 16px; font-size:12.5px; line-height:1.55; color:var(--muted);
+    transition:opacity .22s ease, transform .22s ease;
+  }
+  #intro.hidden{opacity:0; transform:translateY(-8px); pointer-events:none;}
+  #intro h1{margin:0 0 6px 0; font-size:14.5px; color:var(--text); font-weight:600;}
+  #intro b{color:var(--accent); font-weight:600;}
+  #intro b.f{color:var(--food);}
+  #intro b.p{color:#e06a68;}
+  #intro b.s{color:#c0a06a;}
+  #intro b.a{color:#9c968a;}
+  #intro b.c{color:#c9756a;}
+  #intro .close{position:absolute; top:8px; right:11px; cursor:pointer; color:var(--muted); font-size:13px;}
+  #intro .close:hover{color:var(--text);}
+
+  #stats{
+    position:absolute; top:16px; right:16px; text-align:right; z-index:15;
+    background:rgba(17,20,27,0.7); border:1px solid rgba(36,40,50,0.7); border-radius:9px;
+    padding:7px 11px; font-size:10.5px; color:rgba(138,133,120,0.85); line-height:1.65;
+    letter-spacing:0.02em;
+  }
+  #stats b{color:rgba(230,224,212,0.9); font-variant-numeric:tabular-nums; font-weight:500;}
+  #stats b.dead{color:#e06a68;}
+  #stats b.pred{color:#d3625f;}
+  #stats b.scl{color:#c0a06a;}
+  #stats b.car{color:#c9756a;}
+
+  .ui-toggle{
+    position:absolute; bottom:18px; z-index:20;
+    height:34px; min-width:34px; padding:0 11px; border-radius:17px;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    background:rgba(17,20,27,0.85); border:1px solid var(--panel-border);
+    color:var(--muted); font-size:12px; cursor:pointer; backdrop-filter:blur(8px);
+    transition:color .15s, border-color .15s;
+  }
+  .ui-toggle:hover{color:var(--accent); border-color:var(--accent);}
+  .ui-toggle.active{color:var(--accent); border-color:rgba(216,167,82,0.6);}
+  #toggleUI{left:18px;}
+  #toggleInfo{left:132px;}
+  #togglePause{left:178px;}
+
+  #panel{
+    position:absolute; bottom:62px; left:16px; right:16px; z-index:18;
+    background:rgba(17,20,27,0.93); backdrop-filter:blur(10px);
+    border:1px solid var(--panel-border); border-radius:12px;
+    padding:12px 16px; display:flex; gap:18px; flex-wrap:wrap; align-items:center;
+    font-size:12px;
+    transform:translateY(10px); opacity:0; pointer-events:none;
+    transition:opacity .22s ease, transform .22s ease;
+  }
+  #panel.open{transform:translateY(0); opacity:1; pointer-events:auto;}
+
+  .ctrl{display:flex; flex-direction:column; gap:4px; min-width:100px; position:relative;}
+  .ctrl label{color:var(--muted); display:flex; justify-content:space-between; cursor:help;}
+  .ctrl label span.val{color:var(--accent); font-variant-numeric:tabular-nums;}
+
+  .ctrl[data-tip]:hover::after{
+    content:attr(data-tip);
+    position:absolute; bottom:100%; left:50%; transform:translateX(-50%);
+    margin-bottom:9px; width:235px; white-space:normal;
+    background:#0c0e13; border:1px solid var(--panel-border); color:var(--text);
+    padding:9px 11px; border-radius:9px; font-size:11.5px; line-height:1.5; font-weight:400;
+    box-shadow:0 8px 24px rgba(0,0,0,0.6); z-index:30; pointer-events:none;
+  }
+  .ctrl[data-tip]:hover::before{
+    content:''; position:absolute; bottom:100%; left:50%; transform:translateX(-50%);
+    margin-bottom:3px; border:6px solid transparent; border-top-color:var(--panel-border); z-index:30;
+  }
+  .ctrl.tip-left[data-tip]:hover::after{ left:0; transform:none; }
+  .ctrl.tip-left[data-tip]:hover::before{ left:14px; transform:none; }
+  .ctrl.tip-right[data-tip]:hover::after{ left:auto; right:0; transform:none; }
+  .ctrl.tip-right[data-tip]:hover::before{ left:auto; right:14px; transform:none; }
+  input[type=range]{width:110px; accent-color:var(--accent);}
+  select{
+    background:var(--panel); color:var(--text); border:1px solid var(--panel-border);
+    border-radius:8px; padding:6px 8px; font-size:12px;
+  }
+  .btns{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+  button.act{
+    background:var(--panel); border:1px solid var(--panel-border); color:var(--text);
+    padding:7px 12px; border-radius:8px; cursor:pointer; font-size:12px; font-weight:500;
+  }
+  button.act:hover{border-color:var(--accent); color:var(--accent);}
+  button.act.share{border-color:rgba(216,167,82,0.5); color:var(--accent);}
+  .sep{width:1px; align-self:stretch; background:var(--panel-border);}
+
+  #hint{
+    position:absolute; bottom:22px; left:50%; transform:translateX(-50%); z-index:14;
+    font-size:11px; color:rgba(138,133,120,0.75); pointer-events:none;
+    transition:opacity 1s ease;
+  }
+  #hint.gone{opacity:0;}
+  #toast{
+    position:absolute; bottom:70px; left:50%; transform:translateX(-50%) translateY(10px); z-index:22;
+    background:rgba(216,167,82,0.14); border:1px solid rgba(216,167,82,0.65); color:var(--accent);
+    padding:7px 14px; border-radius:20px; font-size:12px; opacity:0; pointer-events:none;
+    transition:opacity .25s, transform .25s; white-space:nowrap;
+  }
+  #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  #toast.warn{background:rgba(194,65,63,0.16); border-color:rgba(224,106,104,0.7); color:#e89b99;}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="view"></canvas>
+
+  <div id="intro">
+    <span class="close" id="introClose">✕</span>
+    <h1>Moho mucilaginoso (Physarum)</h1>
+    Lo que se dibuja es el <b>cuerpo físico</b> de la colonia, no un campo de energía. Las partículas se guían por un rastro químico invisible, pero al pasar depositan tejido que se acumula: el que recibe tránsito sostenido se engrosa hasta volverse <b>vena estable</b> y queda casi fijo. De ahí salen las carreteras.
+    <br><br>El tejido con protoplasma circulando brilla en ocre; cuando el flujo se detiene se enfría hacia <b class="a">ceniza</b> sin perder la forma, así que la red vieja queda legible debajo de la nueva.
+    <br><br><b>Sin comida no muere de golpe.</b> Primero reabsorbe sus propias ramas improductivas para sobrevivir — las ves retraerse. Cuando ya no queda reserva se contrae en <b class="s">esclerocios</b>: costras secas y granuladas donde la colonia se agrupa y espera. Un esclerocio no es tejido muerto, es tejido dormido, y por eso se ve distinto de la ceniza. Si le llega comida se rehidrata durante unos segundos, se hincha, se calienta de color y recién entonces vuelve a echar brazos. Si pasa demasiado tiempo sin nada, muere de verdad.
+    <br><br>Los <b class="p">depredadores</b> muerden tejido: una vena gruesa aguanta varias mordidas y una película recién explorada cae de una. Pero una vena consolidada y con flujo activo puede <b>atrapar</b> al que se meta encima y digerirlo. Todo lo que muere en el plato — depredador o moho — deja <b class="c">carroña</b> que se descompone en nutriente. Nada se pierde.
+    <br><br>Clic para poner <b class="f">comida</b>.
+  </div>
+
+  <div id="hint">clic para poner comida</div>
+  <div id="toast"></div>
+
+  <div id="stats">
+    población: <b id="s-pop">0</b><br>
+    depredadores: <b id="s-pred" class="pred">0</b><br>
+    dormidos: <b id="s-agents">0</b><br>
+    esclerocio: <b id="s-scl" class="scl">0%</b><br>
+    venas: <b id="s-veins">0%</b><br>
+    carroña: <b id="s-carrion" class="car">0</b><br>
+    comida: <b id="s-food">0%</b><br>
+    semilla: <b id="s-seed">—</b><br>
+    paso: <b id="s-step">0</b><br>
+    <span id="s-fps">— fps</span>
+  </div>
+
+  <button class="ui-toggle" id="toggleUI">⚙ controles</button>
+  <button class="ui-toggle" id="toggleInfo">ⓘ</button>
+  <button class="ui-toggle" id="togglePause">❙❙</button>
+
+  <div id="panel">
+    <div class="ctrl tip-left" data-tip="Combinaciones ya armadas de todos los sliders de esta barra, para empezar con un estilo reconocible. Al tocar cualquier slider a mano, vuelve a “personalizado”.">
+      <label>Especie</label>
+      <select id="preset">
+        <option value="">— personalizado —</option>
+        <option value="redes">Redes (clásico)</option>
+        <option value="coral">Coral (denso)</option>
+        <option value="tela">Telaraña (delicado)</option>
+      </select>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="ctrl" data-tip="Techo máximo de población, no la cantidad inicial. La colonia arranca con una fracción chica y va brotando nuevas partículas cuando una está bien alimentada, hasta llegar a este límite.">
+      <label>Agentes (techo) <span class="val" id="v-agents">16000</span></label>
+      <input id="agents" type="range" min="2000" max="40000" step="1000" value="16000">
+    </div>
+    <div class="ctrl" data-tip="Cuánto se abren los 3 ojos (izquierda/centro/derecha) respecto a hacia dónde mira la partícula. Angosto = sigue el rastro con mucha fidelidad, líneas finas y derechas. Ancho = detecta cosas a los costados antes, más ramificado y curvo.">
+      <label>Ángulo sensor <span class="val" id="v-sa">22°</span></label>
+      <input id="sa" type="range" min="8" max="55" step="1" value="22">
+    </div>
+    <div class="ctrl" data-tip="Qué tan lejos miran esos 3 ojos. Corta = reacciona solo a lo que tiene encima, curvas cerradas y detalle fino. Larga = huele comida o rastro lejano antes, curvas más suaves y amplias.">
+      <label>Distancia sensor <span class="val" id="v-so">9</span></label>
+      <input id="so" type="range" min="3" max="22" step="1" value="9">
+    </div>
+    <div class="ctrl" data-tip="Cuán brusco es el giro cuando decide virar. Chico = curvas suaves y fluidas. Grande = zigzags marcados, patrones angulosos.">
+      <label>Ángulo de giro <span class="val" id="v-ra">35°</span></label>
+      <input id="ra" type="range" min="5" max="75" step="1" value="35">
+    </div>
+    <div class="ctrl" data-tip="Distancia que avanza cada paso de simulación. Chico = lento y meticuloso, trazo denso. Grande = explora más rápido pero más tosco, y gasta más energía por movimiento.">
+      <label>Paso <span class="val" id="v-ss">1.1</span></label>
+      <input id="ss" type="range" min="0.4" max="2.2" step="0.1" value="1.1">
+    </div>
+    <div class="ctrl" data-tip="Cuánto deposita la partícula al pasar: alimenta a la vez el rastro químico que guía a las demás y el tejido físico que forma el cuerpo. Alto = las venas se construyen enseguida.">
+      <label>Depósito <span class="val" id="v-dep">4</span></label>
+      <input id="dep" type="range" min="1" max="10" step="0.5" value="4">
+    </div>
+    <div class="ctrl" data-tip="Qué tan rápido se desvanece el RASTRO QUÍMICO invisible que guía a las partículas. No afecta al cuerpo. Alta = solo el olor fresco cuenta, exploración más independiente. Baja = las señales viejas siguen atrayendo.">
+      <label>Evaporación <span class="val" id="v-decay">3%</span></label>
+      <input id="decay" type="range" min="1" max="9" step="0.5" value="3">
+    </div>
+    <div class="ctrl" data-tip="Qué tan rápido se disuelve el TEJIDO FÍSICO sin uso. Las venas gruesas resisten mucho más que la película delgada, así que este control decide sobre todo cuánto dura el historial visible.">
+      <label>Atrofia <span class="val" id="v-atrophy">0.6%</span></label>
+      <input id="atrophy" type="range" min="0.1" max="2.5" step="0.1" value="0.6">
+    </div>
+    <div class="ctrl" data-tip="Energía que gasta la partícula por cada unidad de distancia recorrida (se combina con Paso). Bajo = deambula mucho tiempo antes de agotarse. Alto = se paraliza rápido si no encuentra comida pronto.">
+      <label>Metabolismo <span class="val" id="v-meta">0.06</span></label>
+      <input id="meta" type="range" min="0.01" max="0.30" step="0.01" value="0.06">
+    </div>
+    <div class="ctrl" data-tip="Cuánto aguanta un esclerocio dormido antes de morir de verdad, en segundos. Mientras esté vivo se puede rehidratar con comida; pasado ese plazo muere y se convierte en carroña.">
+      <label>Vida del esclerocio <span class="val" id="v-sleep">60s</span></label>
+      <input id="sleep" type="range" min="10" max="240" step="10" value="60">
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="ctrl" data-tip="Techo máximo de depredadores. Arrancan en cero y aparecen recién después del período de gracia, y se reproducen cazando hasta llegar a este límite. Ponlo en 0 para jugar sin depredadores.">
+      <label>Depredadores <span class="val" id="v-predcap">60</span></label>
+      <input id="predcap" type="range" min="0" max="200" step="5" value="60">
+    </div>
+    <div class="ctrl" data-tip="Qué tan rápido se mueve el depredador. Bajo alcanza para seguirlo con la vista y darle una oportunidad real al moho de esquivarlo. Alto es una cacería mucho más agresiva.">
+      <label>Vel. depredador <span class="val" id="v-predss">0.6</span></label>
+      <input id="predss" type="range" min="0.3" max="1.8" step="0.1" value="0.6">
+    </div>
+    <div class="ctrl" data-tip="Energía que gasta el depredador por moverse y por solo existir. Bajo aguanta mucho tiempo sin comer. Alto necesita cazar seguido o muere de hambre — así se genera el ciclo de auge y caída.">
+      <label>Metab. depred. <span class="val" id="v-predmeta">0.06</span></label>
+      <input id="predmeta" type="range" min="0.02" max="0.30" step="0.01" value="0.06">
+    </div>
+    <div class="ctrl" data-tip="Probabilidad de que una vena consolidada y con flujo activo atrape al depredador que se meta encima. En 0 las venas son solo resistentes; alto las vuelve territorio letal y le da agencia real al moho.">
+      <label>Venas trampa <span class="val" id="v-trap">5%</span></label>
+      <input id="trap" type="range" min="0" max="20" step="1" value="5">
+    </div>
+    <div class="ctrl tip-right" data-tip="Cuánto nutriente devuelve al plato un cadáver al descomponerse. La conversión siempre es con pérdida, como en cualquier cadena trófica: bajo hace que la muerte casi no alimente, alto vuelve la carroña un motor de recuperación.">
+      <label>Valor carroña <span class="val" id="v-carrion">0.75</span></label>
+      <input id="carrion" type="range" min="0" max="1.5" step="0.05" value="0.75">
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="btns">
+      <button class="act" id="resetAgentsBtn">reiniciar mancha</button>
+      <button class="act" id="clearTrailBtn">limpiar tejido</button>
+      <button class="act" id="foodBtn">renovar comida</button>
+      <button class="act" id="predSpawnBtn">🐺 soltar jauría</button>
+      <button class="act" id="predClearBtn">quitar depredadores</button>
+      <button class="act" id="seedBtn">🎲 nueva semilla</button>
+      <button class="act share" id="shareBtn">🔗 copiar enlace</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('view');
+const ctx = canvas.getContext('2d');
+let W, H;
+
+function mulberry32(a){
+  return function(){
+    let t = a += 0x6D2B79F5;
+    t = Math.imul(t ^ t>>>15, t|1);
+    t ^= t + Math.imul(t ^ t>>>7, t|61);
+    return ((t ^ t>>>14) >>> 0) / 4294967296;
+  };
+}
+let currentSeed = 1;
+let rng = mulberry32(currentSeed);
+
+const TARGET_CELLS = 130000;
+const REF_CELLS = 42000;
+let gridW, gridH, SCALE = 1;
+function computeGrid(){
+  const aspect = window.innerWidth / window.innerHeight;
+  gridH = Math.round(Math.sqrt(TARGET_CELLS / aspect));
+  gridW = Math.round(gridH * aspect);
+  SCALE = gridH / Math.sqrt(REF_CELLS / aspect);
+}
+computeGrid();
+
+// Fields, each one a distinct physical thing:
+//   trail      chemical signal — diffuses, evaporates, invisible, steers the agents
+//   biomass    living tissue — no diffusion, accumulates with traffic, atrophies slowly
+//   sclerotium hardened dormant tissue — where a starving colony contracts and waits
+//   scar       ghost of the maximum extent ever reached
+//   carrion    corpses, decomposing into food
+//   vitality   is protoplasm flowing here (gold) or not (ash)
+let trail, blurBuf, biomass, sclerotium, scar, food, carrion, vitality, fear, grain;
+function allocGridArrays(){
+  const n = gridW*gridH;
+  trail = new Float32Array(n);
+  blurBuf = new Float32Array(n);
+  biomass = new Float32Array(n);
+  sclerotium = new Float32Array(n);
+  scar = new Float32Array(n);
+  food = new Float32Array(n);
+  carrion = new Float32Array(n);
+  vitality = new Float32Array(n);
+  fear = new Float32Array(n);
+  grain = new Float32Array(n).fill(0.5);
+}
+allocGridArrays();
+
+function clearBody(){
+  trail.fill(0); biomass.fill(0); sclerotium.fill(0); scar.fill(0);
+  vitality.fill(0); fear.fill(0); carrion.fill(0);
+}
+
+let viewX=0, viewY=0, viewW=0, viewH=0;
+function computeViewport(){
+  const s = Math.min(W/gridW, H/gridH);
+  viewW = gridW*s; viewH = gridH*s;
+  viewX = (W-viewW)/2; viewY = (H-viewH)/2;
+}
+function resize(){
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  computeViewport();
+}
+window.addEventListener('resize', resize);
+resize();
+
+const off = document.createElement('canvas');
+off.width = gridW; off.height = gridH;
+const offCtx = off.getContext('2d');
+const imgData = offCtx.createImageData(gridW, gridH);
+
+const emCanvas = document.createElement('canvas');
+emCanvas.width = gridW; emCanvas.height = gridH;
+const emCtx = emCanvas.getContext('2d');
+const emData = emCtx.createImageData(gridW, gridH);
+
+const CAN_BLUR = (() => {
+  try { ctx.filter = 'blur(2px)'; const ok = ctx.filter !== 'none'; ctx.filter = 'none'; return ok; }
+  catch(e){ return false; }
+})();
+
+// ---- palettes ----
+const stops = [
+  [0.00,   6,   5,   8],
+  [0.25,  48,  26,  10],
+  [0.50, 132,  76,  18],
+  [0.75, 214, 148,  46],
+  [1.00, 250, 226, 170],
+];
+const dormantStops = [ // dead tissue: same luminance, hue removed
+  [0.00,   6,   5,   8],
+  [0.25,  26,  25,  27],
+  [0.50,  60,  58,  62],
+  [0.75, 112, 110, 116],
+  [1.00, 186, 186, 190],
+];
+const crustStops = [   // sclerotium: dry, dull, granular — alive but asleep
+  [0.00,  10,   8,   7],
+  [0.30,  52,  40,  25],
+  [0.60, 110,  88,  55],
+  [1.00, 176, 148, 100],
+];
+function rampColor(table, v){
+  if (v<=0) return table[0].slice(1);
+  if (v>=1) return table[table.length-1].slice(1);
+  for (let i=0;i<table.length-1;i++){
+    const [t0,r0,g0,b0]=table[i], [t1,r1,g1,b1]=table[i+1];
+    if (v>=t0 && v<=t1){ const t=(v-t0)/(t1-t0); return [r0+(r1-r0)*t, g0+(g1-g0)*t, b0+(b1-b0)*t]; }
+  }
+  return [0,0,0];
+}
+function buildLUT(table){
+  const lut = new Uint8ClampedArray(256*3);
+  for (let i=0;i<256;i++){ const [r,g,b]=rampColor(table, i/255); lut[i*3]=r; lut[i*3+1]=g; lut[i*3+2]=b; }
+  return lut;
+}
+const LUT = buildLUT(stops);
+const LUT_DORMANT = buildLUT(dormantStops);
+const LUT_CRUST = buildLUT(crustStops);
+const foodColor = [198, 232, 168];
+const carrionColor = [128, 56, 46];
+
+// ---- body physics ----
+const BIOMASS_MAX = 8;
+const BIOMASS_GAIN = 0.010;
+const BIOMASS_STABLE = 5;
+const BIOMASS_ATTRACT = 8;
+const BIOMASS_EXPOSURE = 0.5;
+const SCAR_KEEP = 0.99985;
+const VITALITY_COOL = 0.9985;
+const HAZE_EXPOSURE = 0.035;
+const GLOW_EXPOSURE = 0.05;
+
+// ---- dormancy / sclerotium ----
+const DORMANT_THRESHOLD = 0.15;
+const SCLEROTIUM_MAX = 6;
+const SCLEROTIUM_GAIN = 0.035;
+const SCLEROTIUM_DECAY = 0.9997;
+const SCLEROTIUM_EXPOSURE = 0.55;
+// A sclerotium is immobile by definition: the colony hardens where it stands, which is why the
+// crust ends up tracing the skeleton of the network it had. It only stirs if it smells food.
+const DORMANT_STEP = 0.16;
+const DORMANT_SENSE = 1.8;       // desperate tissue reaches further than a healthy agent
+const CREEP_THRESHOLD = 0.4;     // below this there is nothing worth spending reserves on
+const WAKE_FRAMES = 110;         // rehydration is visible, not instantaneous
+const REVIVE_ENERGY = 0.7;
+// Building tissue costs energy and reclaiming it refunds only part — otherwise reabsorption
+// would be free energy and the colony could never actually starve.
+const BUILD_COST = 1.5;
+const REABSORB_THRESHOLD = 0.35;
+const REABSORB_RATE = 0.04;
+const REABSORB_ENERGY = 0.8;   // ~53% recovery: retreating buys time, it does not sustain
+
+// ---- carrion ----
+const CARRION_DECOMP = 0.005;    // corpse → nutrient
+const CARRION_ROT = 0.0016;      // corpse → nothing; unreached bodies eventually vanish
+const CARRION_YIELD = 0.55;      // lossy on purpose: a trophic level never returns what it took
+const PRED_CORPSE_RADIUS = 3.2;
+const MOLD_CORPSE_VALUE = 0.10;
+const MOLD_CORPSE_RADIUS = 1.4;
+
+// ---- agents ----
+const LIFE_MAX = 140;
+const LIFE_GAIN = 45;
+const MIN_MOBILITY = 0.05;
+const INITIAL_FRACTION = 0.25;
+const REPRO_CHANCE = 0.12;
+const REPRO_MIN_HEALTH = 0.65;
+const REPRO_COST = LIFE_MAX*0.18;
+let numAgents = 16000;
+let bornCount = 0;
+let aliveMoldCount = 0;
+let moldFreeSlots = [];
+let ax, ay, aH, aBoost, aLife, aDorm, aWake;
+let dormantCount = 0;
+let colonyAwake = true;
+let homeGX = 0, homeGY = 0;
+
+function spawnAgentsCentered(n){
+  numAgents = n;
+  ax = new Float32Array(n); ay = new Float32Array(n); aH = new Float32Array(n);
+  aBoost = new Float32Array(n); aLife = new Float32Array(n);
+  aDorm = new Float32Array(n); aWake = new Float32Array(n);
+  const cx = gridW/2, cy = gridH/2;
+  homeGX = cx; homeGY = cy;
+  const rad = Math.min(gridW,gridH)*0.09;
+  bornCount = Math.max(30, Math.round(n*INITIAL_FRACTION));
+  for (let i=0;i<n;i++){
+    if (i >= bornCount){ aLife[i] = -1; continue; }
+    const a = rng()*Math.PI*2;
+    const r = Math.sqrt(rng())*rad;
+    ax[i] = cx + Math.cos(a)*r;
+    ay[i] = cy + Math.sin(a)*r;
+    aH[i] = rng()*Math.PI*2;
+    aBoost[i] = 0; aDorm[i] = 0; aWake[i] = 0;
+    aLife[i] = LIFE_MAX;
+  }
+  aliveMoldCount = bornCount;
+  moldFreeSlots = [];
+  dormantCount = 0;
+  colonyAwake = true;
+}
+
+function paintField(field, gxCell, gyCell, radius, value, cap){
+  const r0 = Math.ceil(radius);
+  const cx = Math.round(gxCell), cy = Math.round(gyCell);
+  for (let dy=-r0; dy<=r0; dy++){
+    for (let dx=-r0; dx<=r0; dx++){
+      const r = Math.sqrt(dx*dx+dy*dy);
+      if (r>radius) continue;
+      const gx = cx+dx, gy = cy+dy;
+      if (gx<0 || gx>=gridW || gy<0 || gy>=gridH) continue;
+      const idx = gy*gridW+gx;
+      const v = value*(1-r/radius*0.6);
+      if (cap){ if (v>field[idx]) field[idx]=v; }
+      else field[idx] = Math.min(2, field[idx]+v);
+    }
+  }
+}
+function paintFood(gx, gy, radius, value){ paintField(food, gx, gy, radius, value, true); }
+function paintCarrion(gx, gy, radius, value){ paintField(carrion, gx, gy, radius, value, false); }
+
+function seedFood(numBlobs){
+  food.fill(0);
+  for (let b=0; b<numBlobs; b++){
+    paintFood(rng()*gridW, rng()*gridH, (5 + rng()*6)*SCALE, 1.0);
+  }
+}
+function consumeFood(cxf, cyf, radius, amount){
+  const r0 = Math.ceil(radius);
+  const cx = cxf|0, cy = cyf|0;
+  for (let dy=-r0; dy<=r0; dy++){
+    for (let dx=-r0; dx<=r0; dx++){
+      const r = Math.sqrt(dx*dx+dy*dy);
+      if (r>radius) continue;
+      const gx = cx+dx, gy = cy+dy;
+      if (gx<0 || gx>=gridW || gy<0 || gy>=gridH) continue;
+      const idx = gy*gridW+gx;
+      if (food[idx]<=0) continue;
+      food[idx] = Math.max(0, food[idx] - amount*(1-r/radius));
+    }
+  }
+}
+
+function generateGrain(){
+  const n = gridW*gridH;
+  for (let i=0;i<n;i++) grain[i] = rng();
+  for (let pass=0; pass<2; pass++){
+    for (let y=0;y<gridH;y++){
+      const yU=(y>0?y-1:0)*gridW, yD=(y<gridH-1?y+1:gridH-1)*gridW, yC=y*gridW;
+      for (let x=0;x<gridW;x++){
+        const xL=x>0?x-1:0, xR=x<gridW-1?x+1:gridW-1;
+        blurBuf[yC+x] = (grain[yC+x]+grain[yC+xL]+grain[yC+xR]+grain[yU+x]+grain[yD+x])/5;
+      }
+    }
+    grain.set(blurBuf);
+  }
+  let mn=1, mx=0;
+  for (let i=0;i<n;i++){ if (grain[i]<mn) mn=grain[i]; if (grain[i]>mx) mx=grain[i]; }
+  const span = (mx-mn)||1;
+  for (let i=0;i<n;i++) grain[i] = (grain[i]-mn)/span;
+  blurBuf.fill(0);
+}
+
+// ---- predators ----
+const PRED_LIFE_MAX = 120;
+const PRED_LIFE_GAIN = 60;
+const PRED_REPRO_CHANCE = 0.10;
+const PRED_REPRO_MIN_HEALTH = 0.6;
+const PRED_REPRO_COST = PRED_LIFE_MAX*0.4;
+const PRED_BITE_THRESHOLD = 2.0;
+const PRED_BITE_DAMAGE = 2.5;
+const PRED_BITE_RADIUS = 4;
+const PRED_BITE_COOLDOWN = 35;
+const PRED_KILL_SAMPLES = 6;
+const PRED_SA = 30*Math.PI/180;
+const PRED_SO = 13;
+const PRED_RA = 42*Math.PI/180;
+const FEAR_DEPOSIT = 3.2;
+const FEAR_DECAY = 0.90;
+const FEAR_K = 260;
+const GRACE_PERIOD_STEPS = 360;
+// a consolidated vein with protoplasm flowing can engulf what walks onto it
+const TRAP_BIOMASS = 6.8;
+const TRAP_VITALITY = 0.5;
+const TRAP_FRAMES = 90;
+const TRAP_DRAIN = 1.6;
+const TRAP_ESCAPE = 0.006;
+
+let predCap = 60;
+let qx, qy, qH, qLife, qCooldown, qTrap;
+let predBornCount = 0, predAliveCount = 0;
+let predFreeSlots = [];
+let predatorsIntroduced = false;
+let trappedCount = 0;
+
+function spawnPredators(cap, initialCount){
+  predCap = Math.max(0, cap);
+  qx = new Float32Array(predCap); qy = new Float32Array(predCap);
+  qH = new Float32Array(predCap); qLife = new Float32Array(predCap);
+  qCooldown = new Float32Array(predCap); qTrap = new Float32Array(predCap);
+  predFreeSlots = [];
+  predBornCount = Math.min(predCap, initialCount);
+  for (let i=0;i<predCap;i++){
+    if (i >= predBornCount){ qLife[i] = -1; continue; }
+    qx[i] = rng()*gridW; qy[i] = rng()*gridH;
+    qH[i] = rng()*Math.PI*2;
+    qLife[i] = PRED_LIFE_MAX*0.7;
+    qCooldown[i] = 0; qTrap[i] = 0;
+  }
+  predAliveCount = predBornCount;
+  if (initialCount>0) predatorsIntroduced = true;
+}
+
+function addPredators(count){
+  let added = 0;
+  for (let k=0;k<count;k++){
+    let j = -1;
+    if (predFreeSlots.length>0) j = predFreeSlots.pop();
+    else if (predBornCount<predCap) j = predBornCount++;
+    else break;
+    qx[j] = rng()*gridW; qy[j] = rng()*gridH;
+    qH[j] = rng()*Math.PI*2;
+    qLife[j] = PRED_LIFE_MAX*0.6;
+    qCooldown[j] = 0; qTrap[j] = 0;
+    predAliveCount++; added++;
+  }
+  if (added>0) predatorsIntroduced = true;
+}
+
+// A corpse is worth its body, not its leftover reserves. A predator that starved still leaves
+// meat — which matters, because starvation deaths are exactly the ones that feed the recovery.
+function killPredator(i, fat){
+  const value = parseFloat(carrionEl.value) * (0.75 + 0.35*fat);
+  if (value > 0) paintCarrion(qx[i], qy[i], PRED_CORPSE_RADIUS*SCALE, value);
+  qLife[i] = -1;
+  qTrap[i] = 0;
+  predFreeSlots.push(i);
+  predAliveCount--;
+}
+
+function attemptPredation(px, py){
+  if (aliveMoldCount<=0 || bornCount<=0) return;
+  const reach = PRED_BITE_RADIUS*SCALE;
+  let bestJ = -1, bestD2 = Infinity;
+  for (let s=0; s<PRED_KILL_SAMPLES; s++){
+    const j = (rng()*bornCount)|0;
+    if (aLife[j] < 0) continue;
+    const dx = ax[j]-px, dy = ay[j]-py;
+    const d2 = dx*dx+dy*dy;
+    if (d2 < bestD2){ bestD2 = d2; bestJ = j; }
+  }
+  if (bestJ>=0 && bestD2 <= reach*reach){
+    aLife[bestJ] = -1;
+    moldFreeSlots.push(bestJ);
+    aliveMoldCount--;
+  }
+}
+
+// ---- UI ----
+const el = id => document.getElementById(id);
+const agentsEl=el('agents'), saEl=el('sa'), soEl=el('so'), raEl=el('ra'), ssEl=el('ss'), depEl=el('dep'),
+      decayEl=el('decay'), atrophyEl=el('atrophy'), metaEl=el('meta'), sleepEl=el('sleep'), presetEl=el('preset');
+const predCapEl=el('predcap'), predMetaEl=el('predmeta'), predSpeedEl=el('predss'),
+      trapEl=el('trap'), carrionEl=el('carrion');
+const vAgents=el('v-agents'), vSa=el('v-sa'), vSo=el('v-so'), vRa=el('v-ra'), vSs=el('v-ss'),
+      vDep=el('v-dep'), vDecay=el('v-decay'), vAtrophy=el('v-atrophy'), vMeta=el('v-meta'), vSleep=el('v-sleep');
+const vPredcap=el('v-predcap'), vPredmeta=el('v-predmeta'), vPredss=el('v-predss'),
+      vTrap=el('v-trap'), vCarrion=el('v-carrion');
+
+function syncLabels(){
+  vAgents.textContent = agentsEl.value;
+  vSa.textContent = saEl.value+'°';
+  vSo.textContent = soEl.value;
+  vRa.textContent = raEl.value+'°';
+  vSs.textContent = parseFloat(ssEl.value).toFixed(1);
+  vDep.textContent = depEl.value;
+  vDecay.textContent = decayEl.value+'%';
+  vAtrophy.textContent = parseFloat(atrophyEl.value).toFixed(1)+'%';
+  vMeta.textContent = parseFloat(metaEl.value).toFixed(2);
+  vSleep.textContent = sleepEl.value+'s';
+  vPredcap.textContent = predCapEl.value;
+  vPredmeta.textContent = parseFloat(predMetaEl.value).toFixed(2);
+  vPredss.textContent = parseFloat(predSpeedEl.value).toFixed(1);
+  vTrap.textContent = trapEl.value+'%';
+  vCarrion.textContent = parseFloat(carrionEl.value).toFixed(2);
+  el('s-seed').textContent = currentSeed;
+}
+
+const PRESETS = {
+  redes: { agents:16000, sa:22, so:9,  ra:35, ss:1.1, dep:4, decay:3, atrophy:0.6, meta:0.06 },
+  coral: { agents:26000, sa:34, so:6,  ra:55, ss:0.9, dep:5, decay:2, atrophy:1.2, meta:0.05 },
+  tela:  { agents:8000,  sa:14, so:16, ra:20, ss:1.6, dep:3, decay:4, atrophy:0.3, meta:0.10 },
+};
+function applyPresetValues(p){
+  agentsEl.value=p.agents; saEl.value=p.sa; soEl.value=p.so; raEl.value=p.ra; ssEl.value=p.ss;
+  depEl.value=p.dep; decayEl.value=p.decay; atrophyEl.value=p.atrophy; metaEl.value=p.meta;
+}
+
+const PARAM_KEYS = ['agents','sa','so','ra','ss','dep','decay','atrophy','meta','sleep','predcap','predmeta','predss','trap','carrion'];
+const paramEls = { agents:agentsEl, sa:saEl, so:soEl, ra:raEl, ss:ssEl, dep:depEl, decay:decayEl,
+                   atrophy:atrophyEl, meta:metaEl, sleep:sleepEl, predcap:predCapEl,
+                   predmeta:predMetaEl, predss:predSpeedEl, trap:trapEl, carrion:carrionEl };
+
+function buildShareURL(){
+  const usp = new URLSearchParams();
+  usp.set('seed', currentSeed);
+  if (presetEl.value) usp.set('preset', presetEl.value);
+  PARAM_KEYS.forEach(k => usp.set(k, paramEls[k].value));
+  return location.origin + location.pathname + '?' + usp.toString();
+}
+function updateAddressBar(){
+  try { history.replaceState(null, '', buildShareURL()); } catch(e){}
+}
+
+function applyURLParams(){
+  const usp = new URLSearchParams(location.search);
+  let seed = usp.has('seed') ? parseInt(usp.get('seed'),10) : Math.floor(Math.random()*1e9);
+  if (!Number.isFinite(seed)) seed = Math.floor(Math.random()*1e9);
+  currentSeed = seed;
+  rng = mulberry32(seed);
+
+  if (usp.has('preset') && PRESETS[usp.get('preset')]){
+    const name = usp.get('preset');
+    applyPresetValues(PRESETS[name]);
+    presetEl.value = name;
+  }
+  PARAM_KEYS.forEach(k => {
+    if (usp.has(k)){
+      const v = parseFloat(usp.get(k));
+      if (Number.isFinite(v)) paramEls[k].value = v;
+    }
+  });
+}
+
+function applyPreset(name){
+  if (!name) return;
+  applyPresetValues(PRESETS[name]);
+  syncLabels();
+  spawnAgentsCentered(PRESETS[name].agents);
+  clearBody();
+  updateAddressBar();
+}
+presetEl.addEventListener('change', () => applyPreset(presetEl.value));
+
+[saEl,soEl,raEl,ssEl,depEl,decayEl,atrophyEl,metaEl,sleepEl].forEach(i => {
+  i.addEventListener('input', () => { presetEl.value=''; syncLabels(); });
+  i.addEventListener('change', () => updateAddressBar());
+});
+agentsEl.addEventListener('input', () => { presetEl.value=''; syncLabels(); });
+agentsEl.addEventListener('change', () => { spawnAgentsCentered(parseInt(agentsEl.value,10)); syncLabels(); updateAddressBar(); });
+
+[predMetaEl, predSpeedEl, trapEl, carrionEl].forEach(i => {
+  i.addEventListener('input', syncLabels);
+  i.addEventListener('change', () => updateAddressBar());
+});
+predCapEl.addEventListener('input', syncLabels);
+predCapEl.addEventListener('change', () => {
+  const cap = parseInt(predCapEl.value,10);
+  spawnPredators(cap, Math.min(6, cap));
+  syncLabels(); updateAddressBar();
+});
+
+el('resetAgentsBtn').addEventListener('click', () => { spawnAgentsCentered(parseInt(agentsEl.value,10)); clearBody(); });
+el('clearTrailBtn').addEventListener('click', clearBody);
+el('foodBtn').addEventListener('click', () => seedFood(6));
+el('predSpawnBtn').addEventListener('click', () => addPredators(6));
+el('predClearBtn').addEventListener('click', () => {
+  qLife.fill(-1); qTrap.fill(0); predBornCount = 0; predAliveCount = 0; predFreeSlots = []; fear.fill(0);
+});
+el('seedBtn').addEventListener('click', () => {
+  currentSeed = Math.floor(Math.random()*1e9);
+  rng = mulberry32(currentSeed);
+  spawnAgentsCentered(parseInt(agentsEl.value,10));
+  seedFood(6);
+  generateGrain();
+  spawnPredators(parseInt(predCapEl.value,10), 0);
+  predatorsIntroduced = false;
+  stepCount = 0;
+  clearBody();
+  syncLabels(); updateAddressBar();
+});
+
+function showToast(msg, warn){
+  const t = el('toast');
+  t.textContent = msg;
+  t.classList.toggle('warn', !!warn);
+  t.classList.add('show');
+  clearTimeout(showToast._tm);
+  showToast._tm = setTimeout(() => t.classList.remove('show'), 2600);
+}
+el('shareBtn').addEventListener('click', async () => {
+  const url = buildShareURL();
+  try { await navigator.clipboard.writeText(url); showToast('enlace copiado ✓'); }
+  catch(e){ window.prompt('Copia el enlace:', url); }
+});
+
+const panelEl = el('panel'), introEl = el('intro');
+function setPanel(open){ panelEl.classList.toggle('open', open); el('toggleUI').classList.toggle('active', open); }
+function setInfo(open){ introEl.classList.toggle('hidden', !open); el('toggleInfo').classList.toggle('active', open); }
+el('toggleUI').addEventListener('click', () => setPanel(!panelEl.classList.contains('open')));
+el('toggleInfo').addEventListener('click', () => setInfo(introEl.classList.contains('hidden')));
+el('introClose').addEventListener('click', () => setInfo(false));
+setPanel(false); setInfo(true);
+
+let paused = false;
+function setPaused(p){
+  paused = p;
+  el('togglePause').textContent = paused ? '▶' : '❙❙';
+  el('togglePause').classList.toggle('active', paused);
+}
+el('togglePause').addEventListener('click', () => setPaused(!paused));
+
+window.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+  if (e.code === 'Space'){ e.preventDefault(); setPaused(!paused); }
+  else if (e.key === 'c' || e.key === 'C') setPanel(!panelEl.classList.contains('open'));
+  else if (e.key === 'i' || e.key === 'I') setInfo(introEl.classList.contains('hidden'));
+});
+
+setTimeout(() => el('hint').classList.add('gone'), 9000);
+
+let dragging = false;
+canvas.addEventListener('mousedown', e => { dragging=true; paintFoodAtScreen(e); });
+window.addEventListener('mouseup', () => dragging=false);
+canvas.addEventListener('mousemove', e => { if (dragging) paintFoodAtScreen(e); });
+function paintFoodAtScreen(e){
+  const gx = ((e.clientX - viewX)/viewW)*gridW;
+  const gy = ((e.clientY - viewY)/viewH)*gridH;
+  if (gx<0 || gx>=gridW || gy<0 || gy>=gridH) return;
+  paintFood(gx, gy, 7*SCALE, 1.0);
+}
+
+// ---- sensing ----
+function outsidePenalty(px, py){
+  let d = 0;
+  if (px < 0) d -= px; else if (px >= gridW) d += px - gridW + 1;
+  if (py < 0) d -= py; else if (py >= gridH) d += py - gridH + 1;
+  return -1000 - d*200;
+}
+function sampleMoldSignal(px, py){
+  if (px<0 || px>=gridW || py<0 || py>=gridH) return outsidePenalty(px, py);
+  const idx = (py|0)*gridW + (px|0);
+  return trail[idx] + biomass[idx]*BIOMASS_ATTRACT + food[idx]*FOOD_K - fear[idx]*FEAR_K;
+}
+// a dormant agent has no chemical signalling left — the only thing that moves it is nutrient
+function sampleDormantSignal(px, py){
+  if (px<0 || px>=gridW || py<0 || py>=gridH) return -1;
+  const idx = (py|0)*gridW + (px|0);
+  return food[idx]*FOOD_K + carrion[idx]*FOOD_K*0.4;
+}
+function samplePreySignal(px, py){
+  if (px<0 || px>=gridW || py<0 || py>=gridH) return outsidePenalty(px, py);
+  const idx = (py|0)*gridW + (px|0);
+  return biomass[idx] * (0.35 + 0.65*vitality[idx]);
+}
+
+const BOOST_FRAMES = 40;
+const CONSUME_RATE = 0.010;
+const FOOD_K = 220;
+
+function stepAgents(){
+  const SA = parseFloat(saEl.value) * Math.PI/180;
+  const SO = parseFloat(soEl.value) * SCALE;
+  const RA = parseFloat(raEl.value) * Math.PI/180;
+  const SS = parseFloat(ssEl.value);
+  const depBase = parseFloat(depEl.value);
+  const metaBase = parseFloat(metaEl.value);
+  const deathFrames = parseFloat(sleepEl.value) * 60;
+  const carrionVal = parseFloat(carrionEl.value);
+  const biteRadius = 1.8*SCALE;
+  const maxX = gridW-1.001, maxY = gridH-1.001;
+
+  let dormant = 0;
+
+  for (let i=0;i<numAgents;i++){
+    if (aLife[i] < 0) continue;
+
+    const energyFrac = aLife[i] / LIFE_MAX;
+    let heading = aH[i];
+    const x = ax[i], y = ay[i];
+
+    // ================= DORMANT: contracted into sclerotium =================
+    if (energyFrac < DORMANT_THRESHOLD){
+      dormant++;
+      aDorm[i]++;
+
+      const dso = SO * DORMANT_SENSE;
+      const F  = sampleDormantSignal(x+Math.cos(heading)*dso, y+Math.sin(heading)*dso);
+      const L  = sampleDormantSignal(x+Math.cos(heading-SA)*dso, y+Math.sin(heading-SA)*dso);
+      const Rr = sampleDormantSignal(x+Math.cos(heading+SA)*dso, y+Math.sin(heading+SA)*dso);
+
+      let nx = x, ny = y;
+      const best = F>L ? (F>Rr?F:Rr) : (L>Rr?L:Rr);
+      const onFood = food[(y|0)*gridW+(x|0)] > 0.02;
+      // Once it has reached food it must STAY there: rehydration needs uninterrupted contact, and
+      // a creeping agent would wander off the source and reset its own recovery every few frames.
+      if (!onFood && best > CREEP_THRESHOLD){
+        if (F>=L && F>=Rr) heading += (rng()-0.5)*0.05;
+        else if (L>Rr) heading -= RA;
+        else heading += RA;
+
+        const crawl = SS * DORMANT_STEP * SCALE;
+        nx = x+Math.cos(heading)*crawl; ny = y+Math.sin(heading)*crawl;
+        if (nx < 0){ nx = -nx; heading = Math.PI - heading; }
+        else if (nx > maxX){ nx = 2*maxX - nx; heading = Math.PI - heading; }
+        if (ny < 0){ ny = -ny; heading = -heading; }
+        else if (ny > maxY){ ny = 2*maxY - ny; heading = -heading; }
+        if (nx < 0) nx = 0; else if (nx > maxX) nx = maxX;
+        if (ny < 0) ny = 0; else if (ny > maxY) ny = maxY;
+        ax[i]=nx; ay[i]=ny; aH[i]=heading;
+      }
+      // otherwise it does not move at all — it is hardened in place
+
+      const idx = (ny|0)*gridW + (nx|0);
+      const sc = sclerotium[idx] + SCLEROTIUM_GAIN;
+      sclerotium[idx] = sc > SCLEROTIUM_MAX ? SCLEROTIUM_MAX : sc;
+
+      if (food[idx] > 0.02){
+        aWake[i]++;
+        // rehydrating tissue starts signalling again, which both lights it up and calls the others
+        const w = aWake[i]/WAKE_FRAMES;
+        trail[idx] += 3.0*w;
+        if (vitality[idx] < 0.45*w) vitality[idx] = 0.45*w;
+        if (aWake[i] >= WAKE_FRAMES){
+          aLife[i] = LIFE_MAX*REVIVE_ENERGY;
+          aWake[i] = 0; aDorm[i] = 0;
+          consumeFood(nx, ny, biteRadius, CONSUME_RATE*2);
+          sclerotium[idx] = Math.max(0, sclerotium[idx]-2.0);
+        }
+      } else if (aWake[i] > 0){
+        aWake[i] = Math.max(0, aWake[i]-2); // the food went away: it dries back out
+      }
+
+      // a sclerotium survives a long time, but not forever
+      if (aDorm[i] > deathFrames){
+        if (carrionVal > 0) paintCarrion(nx, ny, MOLD_CORPSE_RADIUS*SCALE, MOLD_CORPSE_VALUE*carrionVal);
+        aLife[i] = -1;
+        moldFreeSlots.push(i);
+        aliveMoldCount--;
+      }
+      continue;
+    }
+
+    // ================= ACTIVE =================
+    aDorm[i] = 0; aWake[i] = 0;
+
+    const F  = sampleMoldSignal(x+Math.cos(heading)*SO, y+Math.sin(heading)*SO);
+    const L  = sampleMoldSignal(x+Math.cos(heading-SA)*SO, y+Math.sin(heading-SA)*SO);
+    const Rr = sampleMoldSignal(x+Math.cos(heading+SA)*SO, y+Math.sin(heading+SA)*SO);
+    if (F>=L && F>=Rr) heading += (rng()-0.5)*0.06;
+    else if (F<L && F<Rr) heading += (rng()<0.5?-1:1)*RA;
+    else if (L>Rr) heading -= RA;
+    else heading += RA;
+
+    const mobility = Math.max(MIN_MOBILITY, energyFrac);
+    const stepRef = SS * mobility;
+    const effSS = stepRef * SCALE;
+
+    let nx = x+Math.cos(heading)*effSS, ny = y+Math.sin(heading)*effSS;
+    if (nx < 0){ nx = -nx; heading = Math.PI - heading; }
+    else if (nx > maxX){ nx = 2*maxX - nx; heading = Math.PI - heading; }
+    if (ny < 0){ ny = -ny; heading = -heading; }
+    else if (ny > maxY){ ny = 2*maxY - ny; heading = -heading; }
+    if (nx < 0) nx = 0; else if (nx > maxX) nx = maxX;
+    if (ny < 0) ny = 0; else if (ny > maxY) ny = maxY;
+    ax[i]=nx; ay[i]=ny; aH[i]=heading;
+
+    const idx = (ny|0)*gridW + (nx|0);
+    let dep = depBase * mobility;
+    if (aBoost[i] > 0){ dep *= 7; aBoost[i]--; }
+
+    if (energyFrac < REABSORB_THRESHOLD && biomass[idx] > 0.05){
+      // retreat: it eats its own unproductive branch instead of extending it, so the arms
+      // visibly thin out and pull back toward wherever the colony still has reserves
+      const take = Math.min(biomass[idx], REABSORB_RATE);
+      biomass[idx] -= take;
+      aLife[i] = Math.min(LIFE_MAX, aLife[i] + take*REABSORB_ENERGY);
+      trail[idx] += dep*0.3;
+    } else {
+      trail[idx] += dep;
+      const grown = dep*BIOMASS_GAIN;
+      const b = biomass[idx] + grown;
+      biomass[idx] = b > BIOMASS_MAX ? BIOMASS_MAX : b;
+      aLife[i] -= grown*BUILD_COST;   // growing a body is not free
+    }
+    vitality[idx] = vitality[idx]*0.92 + energyFrac*0.08;
+
+    if (food[idx] > 0.02){
+      aBoost[i] = BOOST_FRAMES;
+      aLife[i] = Math.min(LIFE_MAX, aLife[i] + LIFE_GAIN);
+      consumeFood(nx, ny, biteRadius, CONSUME_RATE);
+
+      if (aLife[i]/LIFE_MAX > REPRO_MIN_HEALTH && rng() < REPRO_CHANCE
+          && (moldFreeSlots.length>0 || bornCount<numAgents)){
+        const j = moldFreeSlots.length>0 ? moldFreeSlots.pop() : bornCount++;
+        let bx = nx + (rng()-0.5)*3*SCALE, by = ny + (rng()-0.5)*3*SCALE;
+        if (bx<0) bx=0; else if (bx>maxX) bx=maxX;
+        if (by<0) by=0; else if (by>maxY) by=maxY;
+        ax[j]=bx; ay[j]=by; aH[j]=rng()*Math.PI*2;
+        aBoost[j]=0; aDorm[j]=0; aWake[j]=0;
+        aLife[j] = LIFE_MAX*0.55;
+        aLife[i] = Math.max(0, aLife[i]-REPRO_COST);
+        aliveMoldCount++;
+      }
+    }
+
+    aLife[i] = Math.max(0, aLife[i] - metaBase*stepRef);
+  }
+
+  dormantCount = dormant;
+  if (aliveMoldCount <= 0){
+    if (colonyAwake){ colonyAwake = false; showToast('la colonia se extinguió', true); }
+  } else if (dormant >= aliveMoldCount && colonyAwake){
+    colonyAwake = false;
+    showToast('la colonia se contrajo en esclerocios — pon comida cerca para rehidratarla', true);
+  } else if (dormant < aliveMoldCount*0.9){
+    colonyAwake = true;
+  }
+}
+
+function stepPredators(){
+  const predMeta = parseFloat(predMetaEl.value);
+  const predSSref = parseFloat(predSpeedEl.value);
+  const predSS = predSSref * SCALE;
+  const trapChance = parseFloat(trapEl.value)/100;
+  const so = PRED_SO * SCALE;
+  const maxX = gridW-1.001, maxY = gridH-1.001;
+  let trapped = 0;
+
+  for (let i=0;i<predCap;i++){
+    if (qLife[i] < 0) continue;
+    if (qCooldown[i] > 0) qCooldown[i]--;
+
+    // ---- engulfed by a vein: it can struggle free, or be digested where it stands ----
+    if (qTrap[i] > 0){
+      trapped++;
+      qTrap[i]--;
+      qLife[i] -= TRAP_DRAIN;
+      if (rng() < TRAP_ESCAPE * (qLife[i]/PRED_LIFE_MAX)) qTrap[i] = 0;
+      if (qLife[i] <= 0) killPredator(i, 1.0); // dies right on the vein that caught it
+      continue;
+    }
+
+    let heading = qH[i];
+    const x = qx[i], y = qy[i];
+
+    const F  = samplePreySignal(x+Math.cos(heading)*so, y+Math.sin(heading)*so);
+    const L  = samplePreySignal(x+Math.cos(heading-PRED_SA)*so, y+Math.sin(heading-PRED_SA)*so);
+    const Rr = samplePreySignal(x+Math.cos(heading+PRED_SA)*so, y+Math.sin(heading+PRED_SA)*so);
+    if (F>=L && F>=Rr) heading += (rng()-0.5)*0.08;
+    else if (F<L && F<Rr) heading += (rng()<0.5?-1:1)*PRED_RA;
+    else if (L>Rr) heading -= PRED_RA;
+    else heading += PRED_RA;
+
+    let nx = x+Math.cos(heading)*predSS, ny = y+Math.sin(heading)*predSS;
+    if (nx < 0){ nx = -nx; heading = Math.PI - heading; }
+    else if (nx > maxX){ nx = 2*maxX - nx; heading = Math.PI - heading; }
+    if (ny < 0){ ny = -ny; heading = -heading; }
+    else if (ny > maxY){ ny = 2*maxY - ny; heading = -heading; }
+    if (nx < 0) nx = 0; else if (nx > maxX) nx = maxX;
+    if (ny < 0) ny = 0; else if (ny > maxY) ny = maxY;
+    qx[i]=nx; qy[i]=ny; qH[i]=heading;
+
+    const idx = (ny|0)*gridW + (nx|0);
+    fear[idx] += FEAR_DEPOSIT;
+
+    if (biomass[idx] >= TRAP_BIOMASS && vitality[idx] >= TRAP_VITALITY && rng() < trapChance){
+      qTrap[i] = TRAP_FRAMES;
+      continue;
+    }
+
+    const signal = biomass[idx]*vitality[idx];
+    if (qCooldown[i] <= 0 && signal > PRED_BITE_THRESHOLD){
+      biomass[idx] = Math.max(0, biomass[idx]-PRED_BITE_DAMAGE);
+      qLife[i] = Math.min(PRED_LIFE_MAX, qLife[i]+PRED_LIFE_GAIN);
+      qCooldown[i] = PRED_BITE_COOLDOWN;
+      attemptPredation(nx, ny);
+
+      if (qLife[i]/PRED_LIFE_MAX > PRED_REPRO_MIN_HEALTH && rng() < PRED_REPRO_CHANCE
+          && (predFreeSlots.length>0 || predBornCount<predCap)){
+        const j = predFreeSlots.length>0 ? predFreeSlots.pop() : predBornCount++;
+        let bx = nx+(rng()-0.5)*4*SCALE, by = ny+(rng()-0.5)*4*SCALE;
+        if (bx<0) bx=0; else if (bx>maxX) bx=maxX;
+        if (by<0) by=0; else if (by>maxY) by=maxY;
+        qx[j]=bx; qy[j]=by; qH[j]=rng()*Math.PI*2; qCooldown[j]=0; qTrap[j]=0;
+        qLife[j] = PRED_LIFE_MAX*0.5;
+        qLife[i] = Math.max(0, qLife[i]-PRED_REPRO_COST);
+        predAliveCount++;
+      }
+    }
+
+    qLife[i] -= predMeta*predSSref + 0.02;
+    if (qLife[i] <= 0) killPredator(i, 0.0); // starved: still leaves a body
+  }
+  trappedCount = trapped;
+}
+
+let veinFraction = 0, sclFraction = 0, carrionMass = 0;
+
+function updateFields(){
+  const chemDecay = parseFloat(decayEl.value)/100;
+  const atrophy = parseFloat(atrophyEl.value)/100;
+  const diffuseAmt = 0.55;
+
+  for (let y=0;y<gridH;y++){
+    const yUp = (y>0 ? y-1 : 0)*gridW;
+    const yDn = (y<gridH-1 ? y+1 : gridH-1)*gridW;
+    const yC = y*gridW;
+    for (let x=0;x<gridW;x++){
+      const xL = x>0 ? x-1 : 0;
+      const xR = x<gridW-1 ? x+1 : gridW-1;
+      blurBuf[yC+x] = (trail[yC+x]+trail[yC+xL]+trail[yC+xR]+trail[yUp+x]+trail[yDn+x]) / 5;
+    }
+  }
+
+  const total = gridW*gridH;
+  let veins = 0, scl = 0, carr = 0;
+  for (let i=0;i<total;i++){
+    let v = trail[i]*(1-diffuseAmt) + blurBuf[i]*diffuseAmt;
+    v *= (1-chemDecay);
+    trail[i] = v>0.01 ? v : 0;
+
+    const fv = fear[i]*FEAR_DECAY;
+    fear[i] = fv>0.02 ? fv : 0;
+
+    let b = biomass[i];
+    if (b > 0){
+      const s = b >= BIOMASS_STABLE ? 1 : b/BIOMASS_STABLE;
+      b -= b * atrophy * (1 - 0.95*s*s);
+      biomass[i] = b > 0.02 ? b : 0;
+      if (b >= BIOMASS_STABLE) veins++;
+      const sc = b*0.45;
+      if (sc > scar[i]) scar[i] = sc;
+    }
+
+    if (sclerotium[i] > 0){
+      sclerotium[i] *= SCLEROTIUM_DECAY;
+      if (sclerotium[i] < 0.02) sclerotium[i] = 0; else scl++;
+    }
+
+    // corpses turn into nutrient — lossily — and what nobody reaches eventually rots to nothing
+    let c = carrion[i];
+    if (c > 0){
+      const released = c*CARRION_DECOMP;
+      const f = food[i] + released*CARRION_YIELD;
+      food[i] = f > 1 ? 1 : f;
+      c = (c-released)*(1-CARRION_ROT);
+      carrion[i] = c > 0.004 ? c : 0;
+      carr += c;
+    }
+
+    if (vitality[i] > 0) vitality[i] *= VITALITY_COOL;
+    if (scar[i] > 0) scar[i] *= SCAR_KEEP;
+  }
+  veinFraction = veins/total;
+  sclFraction = scl/total;
+  carrionMass = carr;
+}
+
+function render(now){
+  const data = imgData.data;
+  const edata = emData.data;
+  const total = gridW*gridH;
+
+  for (let i=0;i<total;i++){
+    const p0 = i*4;
+    // most of the dish is bare substrate — skip the whole tone-mapping chain for those cells
+    if (biomass[i]===0 && trail[i]===0 && scar[i]===0 && sclerotium[i]===0 && food[i]===0 && carrion[i]===0){
+      data[p0]=6; data[p0+1]=5; data[p0+2]=8; data[p0+3]=255;
+      edata[p0]=0; edata[p0+1]=0; edata[p0+2]=0; edata[p0+3]=255;
+      continue;
+    }
+
+    let v = 1 - Math.exp(-biomass[i]*BIOMASS_EXPOSURE);
+    const haze = (1 - Math.exp(-trail[i]*HAZE_EXPOSURE))*0.28;
+    if (haze > v) v = haze;
+    const ghost = (1 - Math.exp(-scar[i]*0.6))*0.13;
+    if (ghost > v) v = ghost;
+
+    const o = ((v*255)|0)*3;
+    const mix = vitality[i]<0?0:(vitality[i]>1?1:vitality[i]);
+
+    let r = LUT_DORMANT[o]   + (LUT[o]  -LUT_DORMANT[o]  )*mix;
+    let g = LUT_DORMANT[o+1] + (LUT[o+1]-LUT_DORMANT[o+1])*mix;
+    let b = LUT_DORMANT[o+2] + (LUT[o+2]-LUT_DORMANT[o+2])*mix;
+
+    const activity = 1 - Math.exp(-trail[i]*GLOW_EXPOSURE);
+    let em = mix * activity * activity;
+
+    // sclerotium sits ON TOP of everything: dormant-but-alive must never be confused with ash
+    const sv = sclerotium[i];
+    if (sv > 0.02){
+      const s = 1 - Math.exp(-sv*SCLEROTIUM_EXPOSURE);
+      const co = ((s*255)|0)*3;
+      const speck = 0.72 + 0.56*grain[i];  // dry, granular crust
+      const w = s > 1 ? 1 : s;
+      r = r*(1-w) + LUT_CRUST[co]*speck*w;
+      g = g*(1-w) + LUT_CRUST[co+1]*speck*w;
+      b = b*(1-w) + LUT_CRUST[co+2]*speck*w;
+      em *= 0.35;
+      // a rehydrating knot warms and swells before it sends out anything
+      const wake = mix*s;
+      if (wake > em) em = wake*0.8;
+    }
+
+    const cv = carrion[i];
+    if (cv > 0.004){
+      const m = Math.min(1, cv)*0.8;
+      r += (carrionColor[0]-r)*m;
+      g += (carrionColor[1]-g)*m;
+      b += (carrionColor[2]-b)*m;
+      if (m*0.25 > em) em = m*0.25;
+    }
+
+    const fdv = food[i];
+    if (fdv>0.004){
+      const m = Math.pow(fdv<1?fdv:1, 0.55)*0.9;
+      r += (foodColor[0]-r)*m;
+      g += (foodColor[1]-g)*m;
+      b += (foodColor[2]-b)*m;
+      const fe = m*0.85;
+      if (fe > em) em = fe;
+    }
+
+    const p = i*4;
+    data[p]=r; data[p+1]=g; data[p+2]=b; data[p+3]=255;
+    edata[p]=r*em; edata[p+1]=g*em; edata[p+2]=b*em; edata[p+3]=255;
+  }
+
+  offCtx.putImageData(imgData, 0, 0);
+  emCtx.putImageData(emData, 0, 0);
+
+  ctx.fillStyle = '#06070a';
+  ctx.fillRect(0,0,W,H);
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(off, 0,0,gridW,gridH, viewX,viewY,viewW,viewH);
+
+  if (CAN_BLUR){
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.filter = 'blur(5px)';
+    ctx.globalAlpha = 0.55;
+    ctx.drawImage(emCanvas, 0,0,gridW,gridH, viewX,viewY,viewW,viewH);
+    ctx.filter = 'blur(20px)';
+    ctx.globalAlpha = 0.45;
+    ctx.drawImage(emCanvas, 0,0,gridW,gridH, viewX,viewY,viewW,viewH);
+    ctx.restore();
+  }
+
+  const hx = viewX + (homeGX/gridW)*viewW, hy = viewY + (homeGY/gridH)*viewH;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(200,190,170,0.28)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(hx, hy, 5 + 1.5*Math.sin((now||0)*0.004), 0, Math.PI*2);
+  ctx.stroke();
+  ctx.restore();
+
+  const t = now||0;
+  const sx = viewW/gridW, sy = viewH/gridH;
+  for (let i=0;i<predCap;i++){
+    if (qLife[i] < 0) continue;
+    const px = viewX + qx[i]*sx, py = viewY + qy[i]*sy;
+    const energyFrac = Math.max(0, Math.min(1, qLife[i]/PRED_LIFE_MAX));
+    const isTrapped = qTrap[i] > 0;
+    const radius = 4.5 + 3*energyFrac;
+    // a trapped one thrashes instead of chomping
+    const mouthHalf = isTrapped
+      ? 0.5 + 0.42*Math.sin(t*0.05 + i)
+      : 0.12 + 0.78*Math.abs(Math.sin(t*0.012 + i*2.399963));
+
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(qH[i] + (isTrapped ? Math.sin(t*0.045+i)*0.35 : 0));
+    ctx.fillStyle = isTrapped
+      ? `hsl(6, 34%, ${18+10*energyFrac}%)`
+      : `hsl(1, 52%, ${26+16*energyFrac}%)`;
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.arc(0, 0, radius, mouthHalf, Math.PI*2 - mouthHalf, false);
+    ctx.closePath();
+    ctx.fill();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(18,6,6,0.9)';
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(240,226,206,0.9)';
+    ctx.beginPath();
+    ctx.arc(radius*0.12, -radius*0.52, radius*0.17, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+
+    if (isTrapped){
+      // the vein closing around it
+      ctx.save();
+      ctx.strokeStyle = `rgba(226,182,96,${0.35+0.3*Math.sin(t*0.03+i)})`;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(px, py, radius + 3.5 + 1.5*Math.sin(t*0.03+i), 0, Math.PI*2);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+}
+
+// ---- init ----
+applyURLParams();
+syncLabels();
+spawnAgentsCentered(parseInt(agentsEl.value,10));
+seedFood(6);
+generateGrain();
+spawnPredators(parseInt(predCapEl.value,10), 0);
+updateAddressBar();
+
+let stepCount=0, lastTime=performance.now(), frames=0, fpsAcc=0;
+let initialFoodMass=0; for (let i=0;i<food.length;i++) initialFoodMass+=food[i];
+if (initialFoodMass<=0) initialFoodMass=1;
+
+function loop(now){
+  const dt = now-lastTime; lastTime=now;
+  frames++; fpsAcc+=dt;
+  if (fpsAcc>500){ el('s-fps').textContent = Math.round(1000/(fpsAcc/frames))+' fps'; frames=0; fpsAcc=0; }
+
+  if (!paused){
+    stepAgents();
+    stepPredators();
+    updateFields();
+    stepCount++;
+
+    if (!predatorsIntroduced && predCap>0 && stepCount>=GRACE_PERIOD_STEPS){
+      addPredators(Math.min(6, predCap));
+      showToast('la colonia tuvo tiempo de establecerse — llegan los primeros depredadores', true);
+    }
+
+    el('s-step').textContent = stepCount;
+    el('s-pop').textContent = aliveMoldCount + ' / ' + numAgents;
+    el('s-pred').textContent = predAliveCount + ' / ' + predCap + (trappedCount ? ' (' + trappedCount + ' atrapados)' : '');
+    el('s-scl').textContent = (sclFraction*100).toFixed(1)+'%';
+    el('s-veins').textContent = (veinFraction*100).toFixed(1)+'%';
+    el('s-carrion').textContent = carrionMass.toFixed(0);
+    const agentsStat = el('s-agents');
+    agentsStat.textContent = dormantCount + ' / ' + aliveMoldCount;
+    agentsStat.className = (aliveMoldCount>0 && dormantCount>=aliveMoldCount) ? 'dead' : '';
+    let fm=0; for (let i=0;i<food.length;i++) fm+=food[i];
+    el('s-food').textContent = Math.round(Math.min(100,(fm/initialFoodMass)*100))+'%';
+  }
+  render(now);
+  requestAnimationFrame(loop);
+}
+render(0);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
