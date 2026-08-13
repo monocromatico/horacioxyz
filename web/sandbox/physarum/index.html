@@ -48,9 +48,26 @@
     padding:12px 16px; display:flex; gap:18px; flex-wrap:wrap; align-items:center;
     font-size:12px;
   }
-  .ctrl{display:flex; flex-direction:column; gap:4px; min-width:100px;}
-  .ctrl label{color:var(--muted); display:flex; justify-content:space-between;}
+  .ctrl{display:flex; flex-direction:column; gap:4px; min-width:100px; position:relative;}
+  .ctrl label{color:var(--muted); display:flex; justify-content:space-between; cursor:help;}
   .ctrl label span.val{color:var(--accent); font-variant-numeric:tabular-nums;}
+
+  .ctrl[data-tip]:hover::after{
+    content:attr(data-tip);
+    position:absolute; bottom:100%; left:50%; transform:translateX(-50%);
+    margin-bottom:9px; width:230px; white-space:normal;
+    background:#0d1424; border:1px solid var(--panel-border); color:var(--text);
+    padding:9px 11px; border-radius:9px; font-size:11.5px; line-height:1.5; font-weight:400;
+    box-shadow:0 8px 24px rgba(0,0,0,0.5); z-index:30; pointer-events:none;
+  }
+  .ctrl[data-tip]:hover::before{
+    content:''; position:absolute; bottom:100%; left:50%; transform:translateX(-50%);
+    margin-bottom:3px; border:6px solid transparent; border-top-color:var(--panel-border); z-index:30;
+  }
+  .ctrl.tip-left[data-tip]:hover::after{ left:0; transform:none; }
+  .ctrl.tip-left[data-tip]:hover::before{ left:14px; transform:none; }
+  .ctrl.tip-right[data-tip]:hover::after{ left:auto; right:0; transform:none; }
+  .ctrl.tip-right[data-tip]:hover::before{ left:auto; right:14px; transform:none; }
   input[type=range]{width:110px; accent-color:var(--accent);}
   select{
     background:var(--panel); color:var(--text); border:1px solid var(--panel-border);
@@ -101,7 +118,7 @@
   </div>
 
   <div id="panel">
-    <div class="ctrl">
+    <div class="ctrl tip-left" data-tip="Combos ya armados de todos los sliders de esta barra, para arrancar con un estilo reconocible. Al tocar cualquier slider a mano, vuelve a “personalizado”.">
       <label>Especie</label>
       <select id="preset">
         <option value="">— personalizado —</option>
@@ -113,35 +130,35 @@
 
     <div class="sep"></div>
 
-    <div class="ctrl">
+    <div class="ctrl" data-tip="Cantidad de partículas simuladas. Más agentes = mancha más densa y estructuras más gruesas (pero más carga). Menos agentes = hilos individuales bien visibles, más ralo.">
       <label>Agentes <span class="val" id="v-agents">7000</span></label>
       <input id="agents" type="range" min="1000" max="18000" step="500" value="7000">
     </div>
-    <div class="ctrl">
+    <div class="ctrl" data-tip="Cuánto se abren los 3 “ojos” (izq/centro/der) respecto a hacia dónde mira la partícula. Angosto = sigue el rastro muy fiel, líneas finas y derechas. Ancho = detecta cosas a los costados antes, más ramificado y curvo.">
       <label>Ángulo sensor <span class="val" id="v-sa">22°</span></label>
       <input id="sa" type="range" min="8" max="55" step="1" value="22">
     </div>
-    <div class="ctrl">
+    <div class="ctrl" data-tip="Qué tan lejos (en celdas) miran esos 3 ojos. Corta = reacciona solo a lo que tiene encima, curvas cerradas. Larga = “huele” comida o rastro lejano antes, curvas más suaves y amplias.">
       <label>Distancia sensor <span class="val" id="v-so">9</span></label>
       <input id="so" type="range" min="3" max="22" step="1" value="9">
     </div>
-    <div class="ctrl">
+    <div class="ctrl" data-tip="Cuán brusco es el giro cuando decide virar. Chico = curvas suaves y fluidas. Grande = zigzags marcados, patrones angulosos.">
       <label>Ángulo de giro <span class="val" id="v-ra">35°</span></label>
       <input id="ra" type="range" min="5" max="75" step="1" value="35">
     </div>
-    <div class="ctrl">
+    <div class="ctrl" data-tip="Distancia que avanza cada paso de simulación. Chico = lento y meticuloso, trazo denso. Grande = explora más rápido pero más tosco, y gasta más energía por movimiento.">
       <label>Paso <span class="val" id="v-ss">1.1</span></label>
       <input id="ss" type="range" min="0.4" max="2.2" step="0.1" value="1.1">
     </div>
-    <div class="ctrl">
+    <div class="ctrl" data-tip="Cuánto rastro deja la partícula al pasar por una celda. Alto = los caminos se ven brillantes casi de inmediato. Bajo = necesita mucho tránsito repetido para notarse.">
       <label>Depósito <span class="val" id="v-dep">4</span></label>
       <input id="dep" type="range" min="1" max="10" step="0.5" value="4">
     </div>
-    <div class="ctrl">
+    <div class="ctrl" data-tip="Porcentaje de rastro que se pierde por instante si nadie lo repasa. Alta = poda rápido, solo sobreviven los caminos muy usados (red limpia). Baja = los rastros duran mucho aunque no se usen (red más “sucia” y permanente).">
       <label>Evaporación <span class="val" id="v-decay">3%</span></label>
       <input id="decay" type="range" min="1" max="9" step="0.5" value="3">
     </div>
-    <div class="ctrl">
+    <div class="ctrl tip-right" data-tip="Energía que gasta la partícula por cada unidad de distancia recorrida (se combina con Paso). Bajo = deambula mucho tiempo antes de agotarse. Alto = se paraliza rápido si no encuentra comida pronto.">
       <label>Metabolismo <span class="val" id="v-meta">0.06</span></label>
       <input id="meta" type="range" min="0.01" max="0.30" step="0.01" value="0.06">
     </div>
