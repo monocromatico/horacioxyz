@@ -35,7 +35,7 @@ jobs:
           # así que basta con reintentar en vez de investigarlo cada vez.
           for i in 1 2 3; do
             rsync -avz --no-o --no-g --omit-dir-times --delete \
-              -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+              -e "ssh -i ~/.ssh/deploy_key -p 61022 -o StrictHostKeyChecking=yes" \
               web/ "deploy@${DEPLOY_HOST}:" && exit 0
             echo "Intento $i falló, reintentando en 10s..."
             sleep 10
