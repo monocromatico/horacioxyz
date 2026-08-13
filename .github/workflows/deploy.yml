@@ -29,9 +29,18 @@ jobs:
           # /opt/stacks/horacio.xyz/web/ en el server (ver authorized_keys).
           # Pasar la ruta absoluta aquí hace que rrsync la concatene con la
           # suya y duplique el path (mkdir .../web/opt/stacks/.../web falla).
-          rsync -avz --no-o --no-g --delete \
-            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
-            web/ "deploy@${DEPLOY_HOST}:"
+          # Reintentos: el server recibe escaneo constante de bots por SSH;
+          # ocasionalmente sshd tira una conexión legítima en medio del
+          # handshake por MaxStartups. No es un problema de credenciales,
+          # así que basta con reintentar en vez de investigarlo cada vez.
+          for i in 1 2 3; do
+            rsync -avz --no-o --no-g --omit-dir-times --delete \
+              -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+              web/ "deploy@${DEPLOY_HOST}:" && exit 0
+            echo "Intento $i falló, reintentando en 10s..."
+            sleep 10
+          done
+          exit 1
         env:
           DEPLOY_KEY: ${{ secrets.HETZNER_DEPLOY_KEY }}
           DEPLOY_HOST: 188.245.164.202
