@@ -24,7 +24,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+          ssh-keyscan -p 61022 -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
           # Sin ruta remota: la llave está restringida vía rrsync a
           # /opt/stacks/horacio.xyz/web/ en el server (ver authorized_keys).
           # Pasar la ruta absoluta aquí hace que rrsync la concatene con la
